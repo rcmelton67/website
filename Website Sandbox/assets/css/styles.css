@@ -110,22 +110,42 @@ a {
    DROPDOWN (Fixed)
 ========================= */
 
+/* dropdown container */
+.nav-item {
+  position: relative;
+}
+
 .dropdown {
   position: relative;
 }
 
+/* dropdown hidden by default */
 .dropdown-menu {
   position: absolute;
-  top: 120%;
+  top: 100%;
   left: 0;
-  background: #1f1f1f;
-  padding: 15px 0;
+  background: #1a1a1a;
   min-width: 220px;
+  padding: 10px 0;
+  border-radius: 6px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  z-index: 1000;
   display: none;
   flex-direction: column;
-  border-radius: 6px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-  z-index: 1000;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* show dropdown on hover (desktop only) */
+@media (min-width: 769px) {
+  .nav-item:hover .dropdown-menu,
+  .dropdown:hover .dropdown-menu,
+  .nav-item .dropdown-menu:hover {
+    display: flex !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
 }
 
 .dropdown-menu li {
@@ -2255,19 +2275,27 @@ a {
 
 .clear-btn {
   position: absolute;
-  right: 5px;
-  /* Moved closer */
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  font-size: 1.5rem;
-  /* Slightly larger */
+  font-size: 1.4rem;
   line-height: 1;
   color: #999;
   cursor: pointer;
   display: none;
-  padding: 0 5px;
+  padding: 4px 6px;
+  z-index: 10;
+  transition: color 0.2s ease;
+}
+
+.clear-btn:hover {
+  color: #666;
+}
+
+.clear-btn:active {
+  color: #333;
 }
 
 /* ── Custom Layout Textarea ── */
@@ -2547,13 +2575,19 @@ a {
   margin-top: 1rem;
 }
 
+.search-box {
+  position: relative;
+  display: inline-block;
+}
+
 #review-search {
   max-width: 240px;
   width: 100%;
-  padding: .65rem .85rem;
+  padding: .65rem 2.5rem .65rem .85rem;
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.15);
   outline: none;
+  box-sizing: border-box;
 }
 
 #review-search:focus {
@@ -3007,12 +3041,23 @@ nav li {
   flex-direction: column;
   border-radius: 6px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
-  z-index: 999;
+  z-index: 1000;
 
   /* Premium Animation */
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Show dropdown on hover (desktop only) */
+@media (min-width: 769px) {
+  .nav-item:hover .dropdown-menu,
+  .dropdown:hover .dropdown-menu,
+  .nav-item .dropdown-menu:hover {
+    display: flex !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
 }
 
 .dropdown-menu.open {

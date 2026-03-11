@@ -22,7 +22,7 @@
 <div class="nav-container">
         <div class="logo">
             <div class="brand">
-                <a href="/">
+                <a href="/pages/home/">
                     <div class="brand-main">
                         <span class="brand-top">MELTON</span>
                         <span class="brand-bottom">MEMORIALS</span>
@@ -69,7 +69,7 @@
 
 
   <nav class="breadcrumb container">
-    <a href="/">Home</a> › <span>Reviews</span>
+    <a href="/pages/home/">Home</a> › <span>Reviews</span>
   </nav>
 
   <main class="container">
@@ -279,11 +279,14 @@
         const barsEl = document.getElementById("rating-bars");
         const pillsEl = document.getElementById("review-pills");
 
-        let activeStarFilter = null;     // 5,4,3,2,1 or null
+        let activeStarFilter = null;     // 5,4,3,2 or null (1-star excluded)
         let activePill = null;           // string or null
         let searchTerm = "";
 
-        const validReviews = reviews.filter(r => typeof r.star_rating === "number");
+        // Exclude 1-star reviews per spec
+        const validReviews = reviews.filter(r => 
+          typeof r.star_rating === "number" && r.star_rating !== 1
+        );
 
         const totalReviews = validReviews.length;
 
@@ -295,7 +298,8 @@
           averageRating = 0;
         }
 
-        const starCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        // Exclude 1-star from counts
+        const starCounts = { 5: 0, 4: 0, 3: 0, 2: 0 };
 
         validReviews.forEach(r => {
           if (starCounts[r.star_rating] !== undefined) {
@@ -309,6 +313,9 @@
 
         function matchesFilters(r) {
           if (!r.message) return false;
+          
+          // Exclude 1-star reviews
+          if (r.star_rating === 1) return false;
 
           if (activeStarFilter && r.star_rating !== activeStarFilter) return false;
 
@@ -383,7 +390,8 @@
           if (!barsEl) return;
           barsEl.innerHTML = "";
 
-          [5, 4, 3, 2, 1].forEach(star => {
+          // Exclude 1-star from display
+          [5, 4, 3, 2].forEach(star => {
             const count = starCounts[star] || 0;
             const pct = total > 0 ? Math.round((count / total) * 100) : 0;
 
