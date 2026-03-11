@@ -1,0 +1,36 @@
+<main class="memorials-hub">
+    <div class="container text-center">
+  
+      <section class="memorials-hero">
+        <div class="tribute-search-wrapper">
+          <input type="text" id="tributeSearch" placeholder="Search tributes..." aria-label="Search tributes">
+        </div>
+        <div class="hero-header-row">
+          <h1>Pet Memorial Tributes</h1>
+        </div>
+  
+        <p>A public tribute library honoring beloved companions and the memories they leave behind.</p>
+        <div class="tribute-count">Honoring {{TRIBUTE_COUNT}} beloved companions and growing.</div>
+  
+        <div class="mm-hero-cta">
+          <a href="https://meltonmemorials.com/pet-tributes/submit/" class="mm-btn-primary">Create a Tribute</a>
+        </div>
+        <p class="mm-hero-subtext">Share the story of a beloved companion and preserve their memory.</p>
+      </section>
+  
+      <div class="tribute-grid">
+        {{CARDS}}
+      </div>
+  
+      {{PAGINATION}}
+  
+      <section class="mm-bottom-cta">
+        <h3>Would you like to honor your beloved companion?</h3>
+        <div class="mm-cta-buttons">
+          <a href="https://meltonmemorials.com/pet-tributes/submit/" class="mm-btn-primary">Create a Tribute</a>
+          <a href="https://meltonmemorials.com/shop/" class="mm-btn-secondary">View All Memorials</a>
+        </div>
+      </section>
+  
+    </div>
+  </main>
