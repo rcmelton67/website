@@ -159,9 +159,48 @@ const templatePage2 = `<!DOCTYPE html>
         </div>
         <div id="search-status" class="search-status"></div>
 
-        <div class="rating-secondary">
-          <div class="pills-block">
-            <div class="pills-label">Most Mentioned:</div>
+        <!-- Rating Summary with Bar Graphs and Pills -->
+        <div class="review-summary">
+          <div class="rating-score">
+            <div class="big-rating">4.98 <span class="stars" style="color: #caa45f;">★★★★★</span></div>
+            <div class="total-line">
+              Based on <strong>3,700+</strong> Verified Customer Reviews
+            </div>
+          </div>
+
+          <div class="rating-bars">
+            <div class="star-row">
+              <div style="color: #caa45f;">★★★★★</div>
+              <div class="bar">
+                <div class="bar-fill" style="width: 98.6%; background: rgba(0, 0, 0, 0.75);"></div>
+              </div>
+              <div style="opacity: .7; text-align: right;">3725</div>
+            </div>
+            <div class="star-row">
+              <div style="color: #caa45f;">★★★★</div>
+              <div class="bar">
+                <div class="bar-fill" style="width: 1.2%; background: rgba(0, 0, 0, 0.75);"></div>
+              </div>
+              <div style="opacity: .7; text-align: right;">46</div>
+            </div>
+            <div class="star-row">
+              <div style="color: #caa45f;">★★★</div>
+              <div class="bar">
+                <div class="bar-fill" style="width: 0.1%; background: rgba(0, 0, 0, 0.75);"></div>
+              </div>
+              <div style="opacity: .7; text-align: right;">3</div>
+            </div>
+            <div class="star-row">
+              <div style="color: #caa45f;">★★</div>
+              <div class="bar">
+                <div class="bar-fill" style="width: 0.0%; background: rgba(0, 0, 0, 0.75);"></div>
+              </div>
+              <div style="opacity: .7; text-align: right;">1</div>
+            </div>
+          </div>
+
+          <div class="review-insights" style="margin-left: 4rem;">
+            <h3>Most Mentioned:</h3>
             <div class="review-pills" id="review-pills"></div>
           </div>
         </div>
@@ -301,10 +340,9 @@ const templatePage2 = `<!DOCTYPE html>
           
           if (searchTerm) {
              const escaped = searchTerm.replace(/[.*+?^\${}()|[\\]\\\\]/g, '\\\\$&');
-             // Use string concatenation to avoid template string nesting hell
-             // We want the generated code to be: new RegExp('\\b' + escaped + '\\b', 'i')
-             // So in the backticked Node script string:
-             const regex = new RegExp('\\\\b' + escaped + '\\\\b', 'i');
+             // Use substring matching (not word boundaries) so partial words match
+             // e.g., "rod" will match "rodney"
+             const regex = new RegExp(escaped, 'i');
              if (!regex.test(r.message)) return false;
           }
 

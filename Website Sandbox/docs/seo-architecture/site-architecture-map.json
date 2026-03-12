@@ -1,0 +1,71 @@
+[
+  {
+    "page": "/pages/home/index.html",
+    "role": "pillar",
+    "tier": 1,
+    "status": "built_in_sandbox",
+    "links_to": [
+      "/pages/products/granite-pet-memorial-stone/index.html",
+      "/pages/dog-memorial-stones/index.html",
+      "/pages/cat-memorial-stones/index.html",
+      "/pages/reviews/index.html",
+      "/memorials/pet-tributes/",
+      "/pages/pet-memorial-guides/index.html",
+      "/pages/about/index.html"
+    ],
+    "supported_by": []
+  },
+  {
+    "page": "/pet-memorial-stones/",
+    "role": "pillar",
+    "tier": 1,
+    "status": "planned_next",
+    "links_to": [
+      "/pages/products/granite-pet-memorial-stone/index.html",
+      "/pages/products/river-rock-pet-memorial-stone/index.html",
+      "/pages/products/cast-stone-pet-memorials/index.html",
+      "/pages/dog-memorial-stones/index.html",
+      "/pages/cat-memorial-stones/index.html",
+      "/pages/reviews/index.html",
+      "/memorials/pet-tributes/",
+      "/pages/pet-memorial-guides/index.html",
+      "/pet-loss-gifts/"
+    ],
+    "supported_by": [
+      "/pages/home/index.html",
+      "/pages/reviews/index.html"
+    ]
+  },
+  {
+    "page": "/pages/reviews/index.html",
+    "role": "ugc",
+    "tier": 1,
+    "status": "built_in_sandbox",
+    "links_to": [
+      "/pages/products/granite-pet-memorial-stone/index.html",
+      "/pages/pet-memorial-guides/what-to-write-on-a-pet-memorial-stone/index.html",
+      "/memorials/pet-tributes/"
+    ],
+    "supported_by": [
+      "/pages/products/granite-pet-memorial-stone/index.html",
+      "/pages/pet-memorial-guides/index.html",
+      "/memorials/pet-tributes/"
+    ]
+  },
+  {
+    "page": "/memorials/pet-tributes/",
+    "role": "ugc",
+    "tier": 1,
+    "status": "built_in_sandbox",
+    "links_to": [
+      "/pages/products/granite-pet-memorial-stone/index.html",
+      "/pages/reviews/index.html",
+      "/pages/pet-memorial-guides/what-to-write-on-a-pet-memorial-stone/index.html"
+    ],
+    "supported_by": [
+      "/pages/home/index.html",
+      "/pages/reviews/index.html"
+    ]
+  }
+]
+

@@ -1,0 +1,128 @@
+<!--
+  SEO Review Page Template
+  This template shows the structure that each dynamic review page should follow.
+  The review-engine.js will populate the dynamic content.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- These will be populated by page config -->
+  <title>{{PAGE_TITLE}} | Melton Memorials</title>
+  <meta name="description" content="{{META_DESCRIPTION}}">
+  <link rel="canonical" href="https://meltonmemorials.com/pages/reviews/{{CATEGORY}}/{{SLUG}}/">
+  
+  <link rel="stylesheet" href="../../../assets/css/styles.css?v=hardreset3">
+  <link rel="stylesheet" href="../../../assets/css/memorial-theme.css">
+  <script src="../../../assets/js/reviews-data.js?v=2"></script>
+  
+  <!-- Schema will be injected by review-engine.js -->
+</head>
+<body>
+  <!-- Header (same as main reviews page) -->
+  <header class="site-header">
+    <!-- Header content from main reviews page -->
+  </header>
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb container">
+    <a href="/pages/home/index.html">Home</a> &rarr; 
+    <a href="/pages/reviews/index.html">Reviews</a> &rarr; 
+    <span>{{PAGE_TITLE}}</span>
+  </nav>
+
+  <main class="container">
+    <!-- H1 will be populated by engine -->
+    <h1>{{PAGE_TITLE}}</h1>
+    
+    <!-- Intro paragraph -->
+    <p id="review-intro" class="review-intro">{{INTRO_TEXT}}</p>
+
+    <!-- Review Summary Section -->
+    <div class="review-summary">
+      <div class="rating-score">
+        <div class="big-rating" id="average-rating">—</div>
+        <div class="total-line">
+          Based on <span id="review-count">—</span> verified reviews
+        </div>
+      </div>
+
+      <div class="rating-bars" id="rating-bars">
+        <!-- Rating bars will be rendered by engine -->
+      </div>
+
+      <div class="review-insights">
+        <h3>Most Mentioned:</h3>
+        <div class="review-pills" id="review-pills">
+          <!-- Keyword chips will be rendered by engine -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Review Grid -->
+    <section class="review-grid" id="review-grid">
+      <!-- Review cards will be rendered by engine -->
+    </section>
+
+    <!-- Pagination -->
+    <div id="review-pagination">
+      <!-- Pagination will be rendered by engine -->
+    </div>
+
+    <!-- Related Review Pages -->
+    <section class="review-categories" id="related-reviews">
+      <h3>Related Review Pages</h3>
+      <ul id="related-links">
+        <!-- Related links will be populated by engine -->
+      </ul>
+    </section>
+  </main>
+
+  <!-- Footer (same as main reviews page) -->
+  <footer class="site-footer">
+    <!-- Footer content from main reviews page -->
+  </footer>
+
+  <!-- Review Engine Script -->
+  <script src="../../../pages/reviews/_engine/review-engine-bundle.js"></script>
+  <script>
+    // Initialize page when DOM is ready
+    (function() {
+      // Extract slug from URL path
+      const pathParts = window.location.pathname.split('/');
+      const slugIndex = pathParts.indexOf('reviews');
+      let slug = null;
+      let page = 1;
+
+      // Find slug in path (after reviews/)
+      if (slugIndex >= 0 && pathParts.length > slugIndex + 2) {
+        slug = pathParts[slugIndex + 2];
+      }
+
+      // Check for pagination
+      if (pathParts.includes('page') && pathParts.length > pathParts.indexOf('page') + 1) {
+        const pageIndex = pathParts.indexOf('page');
+        page = parseInt(pathParts[pageIndex + 1]) || 1;
+      }
+
+      if (slug && window.ReviewEngine) {
+        // Wait for reviews to load
+        if (window.ALL_REVIEWS && window.ALL_REVIEWS.length > 0) {
+          window.ReviewEngine.loadReviewPage(slug, page);
+        } else {
+          // Wait for reviews to load
+          const checkReviews = setInterval(() => {
+            if (window.ALL_REVIEWS && window.ALL_REVIEWS.length > 0) {
+              clearInterval(checkReviews);
+              window.ReviewEngine.loadReviewPage(slug, page);
+            }
+          }, 100);
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

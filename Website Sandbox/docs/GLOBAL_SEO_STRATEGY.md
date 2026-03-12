@@ -204,3 +204,122 @@ competitive_insights:
     on_page_seo: keyword strategy, content quality
     material_differentiation: broader selection than most
 
+site_authority_architecture:
+
+  authority_topic:
+    core_topic: pet memorial stones
+    objective: >
+      Establish Melton Memorials as the national authority on
+      handcrafted pet memorial stones, dog headstones, and
+      engraved pet grave markers.
+
+  content_pillars:
+
+    guides:
+      purpose: topical authority and long-tail traffic
+      examples:
+        - pet memorial stones guide
+        - choosing a pet headstone
+        - what to write on a pet memorial
+        - granite vs cast stone memorials
+
+    category_pages:
+      purpose: commercial search intent
+      examples:
+        - granite pet memorial stones
+        - river rock pet memorial stones
+        - cast stone pet memorial markers
+
+    product_pages:
+      purpose: conversion and product education
+      focus:
+        - material durability
+        - engraving depth
+        - customization process
+        - size guidance
+
+    tributes:
+      purpose: emotional authority + long-tail SEO
+      description: >
+        Individual tribute pages created for customer pets.
+        Each tribute contains unique emotional content and
+        strengthens topical authority.
+
+    reviews:
+      purpose: trust signals and ranking reinforcement
+      description: >
+        Verified customer testimonials supporting authority
+        for memorial craftsmanship and customer satisfaction.
+
+  tribute_seo_loop:
+
+    required_links_on_each_tribute_page:
+      - link_to_relevant_product_page
+      - link_to_relevant_guide
+      - link_back_to_tribute_archive
+
+    purpose: >
+      Prevent orphan tribute pages and reinforce topical
+      relevance between memorial stories, product pages,
+      and educational guides.
+
+  authority_linking_loop:
+
+    guides_link_to:
+      - category_pages
+      - product_pages
+      - tributes
+
+    category_pages_link_to:
+      - top_guides
+      - product_pages
+
+    product_pages_link_to:
+      - relevant_guides
+      - reviews_page
+      - tribute_archive
+
+    tribute_pages_link_to:
+      - product_pages
+      - guides
+      - tribute_archive
+
+    reviews_page_link_to:
+      - category_pages
+      - product_pages
+
+  authority_reinforcement:
+
+    signals_required:
+      - founder_story
+      - workshop_images
+      - press_mentions
+      - customer_reviews
+      - tribute_stories
+
+    messaging_focus:
+      - handcrafted
+      - deep engraved
+      - outdoor durability
+      - memorial craftsmanship
+      - USA made
+
+  growth_strategy:
+
+    tribute_scale_goal: 300+ tributes
+    guide_target: 15+ guides
+    product_depth: size and material variants
+    review_target: 100+ reviews visible on site
+
+  seo_flywheel:
+
+    structure:
+      - guides generate traffic
+      - category pages capture buyers
+      - product pages convert visitors
+      - tributes expand keyword coverage
+      - reviews reinforce trust
+
+    result: >
+      Continuous topical authority growth for
+      pet memorial stones and related search queries.
