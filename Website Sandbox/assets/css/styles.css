@@ -2472,7 +2472,6 @@ a {
   grid-template-columns: 260px 1fr;
   gap: 2rem;
   align-items: start;
-  margin: 2.5rem 0 1.5rem;
 }
 
 .rating-left {
@@ -2480,9 +2479,18 @@ a {
 }
 
 .big-rating {
-  font-size: 4rem;
+  font-size: 3.5rem;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.big-rating .stars {
+  font-size: 2rem;
+  color: #caa45f;
+  letter-spacing: 2px;
 }
 
 .avg-label {
@@ -2621,10 +2629,59 @@ a {
   font-weight: 600;
 }
 
+.review-pillar {
+  padding-bottom: 80px;
+}
+
+.review-pillar h1 {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.review-pillar > .container > p {
+  text-align: center;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.review-pillar > .container > div > p {
+  text-align: center;
+}
+
+.review-trust-signal {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+
+.review-trust-signal .review-stars {
+  color: #caa45f;
+  font-size: 18px;
+  letter-spacing: 2px;
+  display: block;
+}
+
+.review-trust-signal p {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.product-review-link {
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.product-review-link p {
+  font-size: 1rem;
+  color: #555;
+}
+
 .review-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+  gap: 30px;
   margin-top: 2rem;
 }
 
@@ -2661,13 +2718,13 @@ a {
   gap: 1rem;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 900px) {
   .rating-summary {
     grid-template-columns: 1fr;
   }
 
   .review-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 }
 
@@ -2708,6 +2765,145 @@ a {
   height: 8px;
 }
 
+/* Review Summary Layout - Three Column */
+.review-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+  margin-top: 40px;
+  margin-bottom: 60px;
+}
+
+.rating-score {
+  flex: 0 0 220px;
+  text-align: left;
+}
+
+.rating-bars {
+  flex: 0 0 220px;
+  min-width: 200px;
+  display: grid;
+  gap: .75rem;
+}
+
+.review-insights {
+  flex: 1;
+  max-width: 420px;
+}
+
+.review-insights .search-box {
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.review-insights .search-box #review-search {
+  max-width: 100%;
+  width: 100%;
+}
+
+.review-insights .search-status {
+  margin-bottom: 20px;
+}
+
+.review-insights h3 {
+  margin-bottom: 14px;
+  margin-top: 0;
+  font-weight: 600;
+  opacity: .8;
+}
+
+.review-insights .review-pills {
+  margin-top: 0;
+  max-width: 420px;
+}
+
+.keyword-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 420px;
+}
+
+/* Review Categories Section */
+.review-categories {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.review-categories h3 {
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.review-categories ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.review-categories ul li {
+  margin: 0;
+}
+
+.review-categories a {
+  color: #8b7355;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.review-categories a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile Layout */
+@media (max-width: 900px) {
+  .review-summary {
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  .rating-score {
+    flex: 1;
+    width: 100%;
+  }
+  
+  .rating-bars {
+    flex: 1;
+    width: 100%;
+    margin-top: 20px;
+    min-width: auto;
+  }
+  
+  .review-insights {
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .review-insights .search-box {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .review-insights #review-search {
+    max-width: 100%;
+  }
+  
+  .review-insights .review-pills {
+    max-width: 100%;
+  }
+  
+  .keyword-chips {
+    max-width: 100%;
+  }
+}
+
+/* Legacy styles - keeping for backwards compatibility */
 .rating-secondary {
   display: flex;
   justify-content: flex-end;
@@ -3112,4 +3308,62 @@ nav li {
   content: "▾";
   margin-left: 6px;
   font-size: 0.8em;
+}
+
+/* =========================
+   ABOUT PAGE CTA SECTION
+   ========================= */
+
+.about-cta {
+  text-align: center;
+  padding: 60px 20px 70px;
+}
+
+.about-cta-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.about-cta-quote {
+  font-size: 1.2rem;
+  font-style: italic;
+  margin-bottom: 18px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.about-phone {
+  font-weight: 600;
+  margin-top: 20px;
+}
+
+.about-address {
+  margin-top: 6px;
+  color: #666;
+}
+
+/* Review conversion links section */
+.review-conversion-links {
+  margin-top: 40px;
+  padding-top: 40px;
+}
+
+.review-conversion-links .mm-review-wrapper {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  border-top: 1px solid #e6e2dd;
+  padding-top: 40px;
+}
+
+.review-product-link a {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.review-guide-link,
+.review-category-link,
+.review-archive-link {
+  margin-top: 14px;
 }

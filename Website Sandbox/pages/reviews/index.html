@@ -22,7 +22,7 @@
 <div class="nav-container">
         <div class="logo">
             <div class="brand">
-                <a href="/pages/home/">
+                <a href="/pages/home/index.html">
                     <div class="brand-main">
                         <span class="brand-top">MELTON</span>
                         <span class="brand-bottom">MEMORIALS</span>
@@ -50,13 +50,13 @@
                                 Memorials</a></li>
                         <li><a href="../../pages/products/cast-stone-pet-memorials/index.html">Cast Stone
                                 Memorials</a></li>
-                        <li><a href="../../pages/products/river-rock-pet-memorial-stones/index.html">River Rock
+                        <li><a href="../../pages/memorials/river-rock-pet-memorial-stones/index.html">River Rock
                                 Memorials</a></li>
                     </ul>
                 </li>
 
                 <li><a href="../../pages/pet-memorial-guides/index.html">Guides</a></li>
-                <li><a href="../../pages/reviews/index.html">Reviews</a></li>
+                <li><a href="/pages/reviews/index.html">Reviews</a></li>
                 <li><a href="/memorials/pet-tributes/">Tributes</a></li>
                 <li><a href="../../pages/about/index.html">About</a></li>
                 <li><a href="#contact">Contact</a></li>
@@ -69,41 +69,45 @@
 
 
   <nav class="breadcrumb container">
-    <a href="/pages/home/">Home</a> › <span>Reviews</span>
+    <a href="/pages/home/index.html">Home</a> › <span>Reviews</span>
   </nav>
 
   <main class="container">
 
     <h1>Pet Memorial Stone Reviews</h1>
 
-    <div class="reviews-topline">
-      <div></div>
-      <div class="search-box">
-        <input type="text" id="review-search" placeholder="Search reviews..." aria-label="Search reviews">
-        <button id="clear-search" class="clear-btn" aria-label="Clear search">×</button>
+    <div class="review-summary">
+      <div class="rating-score">
+        <div class="big-rating" id="average-rating">—</div>
+        <div class="total-line">
+          Based on <span id="review-count">—</span> verified reviews
+        </div>
       </div>
-    </div>
-    <div id="search-status" class="search-status"></div>
-    <div class="rating-left">
-      <div class="big-rating" id="average-rating">—</div>
-      <div class="avg-label">★ Average Rating</div>
-      <div class="total-line">
-        Based on <span id="review-count">—</span> verified reviews
+
+      <div class="rating-bars" id="rating-bars">
+        <!-- JS will render star bars here -->
       </div>
-    </div>
 
-    <div class="rating-right" id="rating-bars">
-      <!-- JS will render star bars here -->
-    </div>
-    </div>
-
-    <div class="rating-secondary">
-      <div class="pills-block">
-        <div class="pills-label">Most Mentioned:</div>
+      <div class="review-insights">
+        <div class="search-box">
+          <input type="text" id="review-search" placeholder="Search reviews..." aria-label="Search reviews">
+          <button id="clear-search" class="clear-btn" aria-label="Clear search">×</button>
+        </div>
+        <div id="search-status" class="search-status"></div>
+        <h3>Most Mentioned:</h3>
         <div class="review-pills" id="review-pills"></div>
       </div>
     </div>
-    </div>
+
+    <section class="review-categories">
+      <h3>Browse Reviews by Category</h3>
+      <ul>
+        <li><a href="dog-memorial-stone-reviews/">Dog Memorial Stone Reviews</a></li>
+        <li><a href="cat-memorial-stone-reviews/">Cat Memorial Stone Reviews</a></li>
+        <li><a href="granite-pet-memorial-reviews/">Granite Memorial Reviews</a></li>
+        <li><a href="river-rock-pet-memorial-reviews/">River Rock Memorial Reviews</a></li>
+      </ul>
+    </section>
 
     <section class="review-grid" id="review-grid">
 
@@ -155,6 +159,39 @@
       </a>
     </div>
 
+    <section class="review-conversion-links">
+      <div class="mm-review-wrapper">
+        <h2>Create a Memorial Like This One</h2>
+        <p>
+        This memorial was handcrafted from natural granite and deeply engraved to last for generations.
+        If you would like to create a lasting memorial for your own pet, explore our handcrafted memorial stones below.
+        </p>
+        <p class="review-product-link">
+          <a href="../../pages/products/granite-pet-memorial-stone/">
+            View Granite Pet Memorial Stones &rarr;
+          </a>
+        </p>
+        <p class="review-guide-link">
+          Looking for wording ideas for your own memorial?
+          <a href="../../pages/pet-memorial-guides/what-to-write-on-a-pet-memorial-stone/">
+            Read our guide: What to Write on a Pet Memorial Stone
+          </a>
+        </p>
+        <p class="review-category-link">
+          Looking for memorial stones designed for your pet?
+          <a href="../../pages/dog-memorial-stones/">
+            Browse Dog Memorial Stones
+          </a>
+        </p>
+        <p class="review-archive-link">
+          Want to see more memorials from families who honored their pets?
+          <a href="./index.html">
+            Read More Customer Reviews
+          </a>
+        </p>
+      </div>
+    </section>
+
   </main>
 
   <footer class="site-footer">
@@ -182,7 +219,7 @@
                 <h3>Shop</h3>
                 <a href="../../pages/products/granite-pet-memorial-stone/index.html">Granite Memorials</a>
                 <a href="../../pages/products/cast-stone-pet-memorials/index.html">Cast Stone Memorials</a>
-                <a href="../../pages/products/river-rock-pet-memorial-stones/index.html">River Rock Memorials</a>
+                <a href="../../pages/memorials/river-rock-pet-memorial-stones/index.html">River Rock Memorials</a>
                 <a href="../../pages/products/heart-shaped-pet-memorial-stone/index.html">Heart Shaped</a>
                 <a href="../../pages/products/bone-shaped-pet-memorial-stone/index.html">Bone Shaped</a>
                 <a href="../../pages/products/cat-shaped-pet-memorial-stone/index.html">Cat Shaped</a>
@@ -192,7 +229,7 @@
                 <h3>Resources</h3>
                 <a href="../../pages/pet-memorial-guides/index.html">Memorial Guides</a>
                 <a href="../../pages/memorials/index.html">Pet Memorial Tributes</a>
-                <a href="../../pages/reviews/index.html">Customer Reviews</a>
+                <a href="/pages/reviews/index.html">Customer Reviews</a>
                 <a href="../../pages/about/index.html">About Us</a>
                 <a href="#contact">FAQ</a>
             </div>
@@ -476,7 +513,8 @@
         renderReviews(validReviews);
 
         document.getElementById("review-count").textContent = totalReviews.toLocaleString();
-        document.getElementById("average-rating").textContent = averageRating.toFixed(1);
+        const ratingEl = document.getElementById("average-rating");
+        ratingEl.innerHTML = averageRating.toFixed(2) + ' <span class="stars">★★★★★</span>';
 
       } catch (err) {
         console.error("Review load error:", err);
@@ -492,8 +530,8 @@
  "name": "Melton Memorials",
  "aggregateRating": {
    "@type": "AggregateRating",
-   "ratingValue": "5.0",
-   "reviewCount": "3149"
+   "ratingValue": "4.98",
+   "reviewCount": "3776"
  }
 }
 </script>

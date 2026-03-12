@@ -1128,7 +1128,20 @@ def build_tribute_html(
     content = content.replace("{{SHARE_FACEBOOK_URL}}", share_facebook_url)
     content = content.replace("{{SHARE_PINTEREST_URL}}", share_pinterest_url)
     content = content.replace("{{SHARE_EMAIL_URL}}", share_email_url)
-    content = content.replace("{{TRIBUTE_MESSAGE}}", tribute_message_html)
+
+    # Pet-type link for tribute link section (dog / cat / default)
+    pt_combined = f"{pet_type_clean} {breed_clean}".lower()
+    if "dog" in pt_combined:
+        pet_type_label = "Dog"
+        pet_type_link = "/pages/dog-memorial-stones/"
+    elif "cat" in pt_combined:
+        pet_type_label = "Cat"
+        pet_type_link = "/pages/cat-memorial-stones/"
+    else:
+        pet_type_label = "Pet"
+        pet_type_link = "/pages/products/granite-pet-memorial-stone/"
+    content = content.replace("{{PET_TYPE}}", pet_type_label)
+    content = content.replace("{{PET_TYPE_LINK}}", pet_type_link)
 
     # ----- Load header + footer -----
     header_template = load_template("header.html")

@@ -535,10 +535,11 @@ def build_card_html(entry: dict) -> str:
         or image_filename.endswith("-memorial-stone.png")
         or image_filename.endswith("-memorial-stone.webp")
     )
+    slug = entry.get("slug", "")
     card_img_src = (
         f"{PET_TRIBUTES_WEB_BASE}/assets/blank_memorial_loving_memory.png"
         if (not image_filename or image_filename == "blank_memorial_loving_memory.png")
-        else f"{PET_TRIBUTES_WEB_BASE}/images/{escape_html(image_filename)}"
+        else f"{PET_TRIBUTES_WEB_BASE}/{slug}/{escape_html(image_filename)}"
     )
     card_absolute_url = f"{SITE_DOMAIN}{card_href}"
     card_image_absolute_url = (
@@ -1140,17 +1141,20 @@ def build_tribute_html(
 
     input_filename = os.path.basename(relative_filename_from_url(og_image_abs))
 
-    # Images live in memorials/pet-tributes/images/ (shared folder)
-    images_web_path = f"{PET_TRIBUTES_WEB_BASE}/images/"
+    # Images now live in individual tribute folders
+    # Extract slug from tribute_web_path for absolute URLs
+    slug = tribute_web_path.strip('/').split('/')[-1] if tribute_web_path else ""
+    images_web_path = ""  # Local references for tribute pages
     assets_web_path = f"{PET_TRIBUTES_WEB_BASE}/assets/"
     if input_filename:
         image_filename = input_filename
-        image_path = f"{images_web_path}{image_filename}"
+        image_path = image_filename  # Local reference
         # Use the passed-in og_image_abs directly to ensure consistency
         og_image = og_image_abs
         # Get actual image dimensions if not provided
         if og_image_width is None or og_image_height is None:
-            local_image_path = os.path.join(IMAGE_DIR, image_filename)
+            # Image is in the same folder as the HTML file
+            local_image_path = os.path.join(TRIBUTE_DIR, slug, image_filename) if slug else ""
             img_width, img_height = get_image_dimensions(local_image_path)
             if og_image_width is None:
                 og_image_width = img_width
@@ -1179,7 +1183,7 @@ def build_tribute_html(
     if second_image_filename:
         image_2_block = (
             '<div class="mm-tribute-image mm-tribute-image-secondary">'
-            f'<img src="{images_web_path}{escape_html(second_image_filename)}" alt="{escape_html(image_alt)} 2">'
+            f'<img src="{escape_html(second_image_filename)}" alt="{escape_html(image_alt)} 2" loading="lazy" width="800" height="600">'
             "</div>"
         )
     dates_block = f"<p>{escape_html(years_pretty)}</p>" if years_pretty.strip() else ""
@@ -1302,15 +1306,36 @@ def build_tribute_html(
     content = content.replace("{{TRIBUTE_H1}}", escape_html(tribute_h1))
     content = content.replace("{{TRIBUTE_INTRO}}", escape_html(tribute_intro))
     content = content.replace("{{PET_NAME}}", escape_html(pet_name))
-    content = content.replace("{{IMAGE_PATH}}", image_path)
-    content = content.replace("{{IMAGE_ALT}}", escape_html(image_alt))
+    # Add performance attributes to image path replacement
+    # Template should have: <img src="{{IMAGE_PATH}}" alt="{{IMAGE_ALT}}">
+    # We'll replace with full img tag including performance attributes
+    img_tag = f'<img src="{escape_html(image_path)}" alt="{escape_html(image_alt)}" loading="lazy" width="{og_image_width}" height="{og_image_height}">'
+    content = re.sub(r'<img\s+src="{{IMAGE_PATH}}"\s+alt="{{IMAGE_ALT}}"[^>]*>', img_tag, content)
+    # Fallback if template format is different
+    if "{{IMAGE_PATH}}" in content:
+        content = content.replace("{{IMAGE_PATH}}", image_path)
+    if "{{IMAGE_ALT}}" in content:
+        content = content.replace("{{IMAGE_ALT}}", escape_html(image_alt))
     content = content.replace("{{IMAGE_2_BLOCK}}", image_2_block)
     content = content.replace("{{DATES_BLOCK}}", dates_block)
     content = content.replace("{{SHARED_BLOCK}}", shared_block)
     content = content.replace("{{SHARE_FACEBOOK_URL}}", share_facebook_url)
     content = content.replace("{{SHARE_PINTEREST_URL}}", share_pinterest_url)
     content = content.replace("{{SHARE_EMAIL_URL}}", share_email_url)
-    content = content.replace("{{TRIBUTE_MESSAGE}}", tribute_message_html)
+
+    # Pet-type link for tribute link section (dog / cat / default)
+    pt_combined = f"{pet_type_clean} {breed_clean}".lower()
+    if "dog" in pt_combined:
+        pet_type_label = "Dog"
+        pet_type_link = "/pages/dog-memorial-stones/"
+    elif "cat" in pt_combined:
+        pet_type_label = "Cat"
+        pet_type_link = "/pages/cat-memorial-stones/"
+    else:
+        pet_type_label = "Pet"
+        pet_type_link = "/pages/products/granite-pet-memorial-stone/"
+    content = content.replace("{{PET_TYPE}}", pet_type_label)
+    content = content.replace("{{PET_TYPE_LINK}}", pet_type_link)
 
     # ----- Build full page with Website Sandbox header/footer -----
     # The template contains only <main class="tribute-page">...</main>.
@@ -1425,8 +1450,8 @@ def rebuild_single_tribute_page(entry: dict, tribute_message_override: str = "")
         or image_filename.endswith("-memorial-stone.webp")
     )
     if image_filename and not is_placeholder_image:
-        # Images are stored in /memorials/pet-tributes/images/, not in the tribute folder
-        og_image_abs = f"{SITE_DOMAIN}{PET_TRIBUTES_WEB_BASE}/images/{image_filename}"
+        # Images are now stored in individual tribute folders
+        og_image_abs = f"{SITE_DOMAIN}{PET_TRIBUTES_WEB_BASE}/{slug}/{image_filename}"
     else:
         og_image_abs = f"{SITE_DOMAIN}{PET_TRIBUTES_WEB_BASE}/assets/blank_memorial_loving_memory.png"
 
@@ -1946,8 +1971,10 @@ class TributePublisherApp:
                         "Image conversion requires Pillow.\n\nRun:\n  py -m pip install pillow"
                     )
                     return None
-                safe_mkdir(IMAGE_DIR)
-                output_path = os.path.join(IMAGE_DIR, output_filename)
+                # Images now go to tribute folder, not centralized images directory
+                tribute_folder = find_tribute_folder(slug, entry.get("folder", ""))
+                safe_mkdir(tribute_folder)
+                output_path = os.path.join(tribute_folder, output_filename)
                 try:
                     info = convert_to_webp_normalized(
                         chosen_upload,
@@ -1973,8 +2000,10 @@ class TributePublisherApp:
                     )
                     return None
 
-                safe_mkdir(IMAGE_DIR)
-                output_path = os.path.join(IMAGE_DIR, output_filename)
+                # Images now go to tribute folder, not centralized images directory
+                tribute_folder = find_tribute_folder(slug, entry.get("folder", ""))
+                safe_mkdir(tribute_folder)
+                output_path = os.path.join(tribute_folder, output_filename)
                 try:
                     info = convert_to_webp_normalized(
                         value,
@@ -2077,25 +2106,8 @@ class TributePublisherApp:
                 except Exception as e:
                     print(f"Warning: Could not remove folder {tribute_folder}: {e}")
             
-            # Remove associated image files from images/ directory
-            image_filename = entry.get("image_filename", "").strip()
-            if image_filename:
-                image_path = os.path.join(IMAGE_DIR, image_filename)
-                if os.path.exists(image_path):
-                    try:
-                        os.remove(image_path)
-                    except Exception as e:
-                        print(f"Warning: Could not remove image {image_path}: {e}")
-            
-            # Remove second image if it exists
-            image2_filename = entry.get("image2_filename", "").strip()
-            if image2_filename:
-                image2_path = os.path.join(IMAGE_DIR, image2_filename)
-                if os.path.exists(image2_path):
-                    try:
-                        os.remove(image2_path)
-                    except Exception as e:
-                        print(f"Warning: Could not remove image2 {image2_path}: {e}")
+            # Images are now in tribute folders, so they're deleted automatically with shutil.rmtree above
+            # No need to delete images separately
             
             deleted_count += 1
 
@@ -2261,10 +2273,9 @@ Alma, Arkansas
 
         tribute_folder = os.path.join(TRIBUTE_DIR, folder_slug)
         safe_mkdir(tribute_folder)
-        safe_mkdir(IMAGE_DIR)
         tribute_web_path = f"{PET_TRIBUTES_WEB_BASE}/{folder_slug}/"
 
-        # Images go to memorials/pet-tributes/images/
+        # Images now go to individual tribute folders
         img_abs_url = ""
         img_filename = None
         img2_filename = ""
@@ -2280,7 +2291,7 @@ Alma, Arkansas
                 return
 
             img_filename = f"{folder_slug}.webp"
-            img_dest = os.path.join(IMAGE_DIR, img_filename)
+            img_dest = os.path.join(tribute_folder, img_filename)
 
             try:
                 info = convert_to_webp_normalized(
@@ -2294,7 +2305,7 @@ Alma, Arkansas
                 messagebox.showerror("Image conversion failed", f"Could not convert image to .webp:\n{e}")
                 return
 
-            img_abs_url = f"{SITE_DOMAIN}{PET_TRIBUTES_WEB_BASE}/images/{img_filename}"
+            img_abs_url = f"{SITE_DOMAIN}{PET_TRIBUTES_WEB_BASE}/{folder_slug}/{img_filename}"
         else:
             # No upload: copy placeholder to images folder
             if not os.path.exists(PLACEHOLDER_IMAGE_FILE):
@@ -2304,13 +2315,13 @@ Alma, Arkansas
                 )
                 return
             img_filename = f"{folder_slug}.webp"
-            img_dest = os.path.join(IMAGE_DIR, img_filename)
+            img_dest = os.path.join(tribute_folder, img_filename)
             try:
                 process_placeholder_image(PLACEHOLDER_IMAGE_FILE, img_dest)
             except Exception as e:
                 messagebox.showerror("Placeholder processing failed", f"Could not prepare fallback image:\n{e}")
                 return
-            img_abs_url = f"{SITE_DOMAIN}{PET_TRIBUTES_WEB_BASE}/images/{img_filename}"
+            img_abs_url = f"{SITE_DOMAIN}{PET_TRIBUTES_WEB_BASE}/{folder_slug}/{img_filename}"
 
         chosen_image2 = self.image2_path.get().strip()
         if chosen_image2:
@@ -2321,7 +2332,7 @@ Alma, Arkansas
                 )
                 return
             img2_filename = f"{folder_slug}-2.webp"
-            img2_dest = os.path.join(IMAGE_DIR, img2_filename)
+            img2_dest = os.path.join(tribute_folder, img2_filename)
             try:
                 info2 = convert_to_webp_normalized(
                     chosen_image2,

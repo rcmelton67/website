@@ -1,5 +1,12 @@
 # River Rock Pet Memorial Stones Specification
 
+page_id: river-rock-pet-memorial-stones
+slug: river-rock-pet-memorial-stones
+url: /memorials/river-rock-pet-memorial-stones/
+canonical: https://meltonmemorials.com/pages/memorials/river-rock-pet-memorial-stones/
+page_type: category_page
+status: active
+
 ## Primary Keyword
 - river rock pet memorial stones
 

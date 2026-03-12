@@ -937,3 +937,107 @@ body {
         width: 100%;
     }
 }
+
+/* ----- Tribute internal linking (aligned with .mm-tribute-wrapper column) ----- */
+.tribute-memorial-product,
+.tribute-helpful-guide,
+.tribute-archive-link {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.tribute-memorial-product {
+  margin-top: 40px;
+}
+.tribute-helpful-guide {
+  margin-top: 20px;
+}
+.tribute-archive-link {
+  margin-top: 16px;
+  padding-bottom: 32px;
+}
+.tribute-memorial-product p,
+.tribute-helpful-guide p,
+.tribute-archive-link p {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: #5d5650;
+  margin: 0 0 12px;
+}
+.tribute-memorial-product h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: #2e2a26;
+}
+.tribute-memorial-product a,
+.tribute-helpful-guide a,
+.tribute-archive-link a {
+  color: #4a453f;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0,0,0,0.12);
+}
+.tribute-memorial-product a:hover,
+.tribute-helpful-guide a:hover,
+.tribute-archive-link a:hover {
+  border-bottom-color: rgba(0,0,0,0.28);
+  color: #2e2a26;
+}
+
+
+/* ----- Tribute link section separator and polish ----- */
+.tribute-links {
+  margin-top: 30px;
+  padding-top: 40px;
+}
+
+.tribute-memorial-product a {
+  font-weight: 600;
+}
+
+.tribute-links .mm-tribute-wrapper {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  border-top: 1px solid #e6e2dd;
+  padding-top: 40px;
+}
+
+.tribute-memorial-product {
+  margin-bottom: 24px;
+}
+
+.tribute-helpful-guide {
+  margin-bottom: 18px;
+}
+
+.tribute-pet-type-link {
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.tribute-pet-type-link p {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: #5d5650;
+  margin: 0 0 12px;
+}
+
+.tribute-pet-type-link a {
+  color: #4a453f;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0,0,0,0.12);
+  font-weight: 600;
+}
+
+.tribute-pet-type-link a:hover {
+  border-bottom-color: rgba(0,0,0,0.28);
+  color: #2e2a26;
+}
+
+.tribute-archive-link {
+  margin-bottom: 20px;
+}

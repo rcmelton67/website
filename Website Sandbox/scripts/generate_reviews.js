@@ -172,6 +172,39 @@ const templatePage2 = `<!DOCTYPE html>
 
         <!-- Pagination -->
         {{PAGINATION}}
+
+        <section class="review-conversion-links">
+          <div class="mm-review-wrapper">
+            <h2>Create a Memorial Like This One</h2>
+            <p>
+            This memorial was handcrafted from natural granite and deeply engraved to last for generations.
+            If you would like to create a lasting memorial for your own pet, explore our handcrafted memorial stones below.
+            </p>
+            <p class="review-product-link">
+              <a href="../../../../pages/products/granite-pet-memorial-stone/">
+                View Granite Pet Memorial Stones &rarr;
+              </a>
+            </p>
+            <p class="review-guide-link">
+              Looking for wording ideas for your own memorial?
+              <a href="../../../../pages/pet-memorial-guides/what-to-write-on-a-pet-memorial-stone/">
+                Read our guide: What to Write on a Pet Memorial Stone
+              </a>
+            </p>
+            <p class="review-category-link">
+              Looking for memorial stones designed for your pet?
+              <a href="../../../../pages/dog-memorial-stones/">
+                Browse Dog Memorial Stones
+              </a>
+            </p>
+            <p class="review-archive-link">
+              Want to see more memorials from families who honored their pets?
+              <a href="../../index.html">
+                Read More Customer Reviews
+              </a>
+            </p>
+          </div>
+        </section>
     </main>
 
     <footer class="site-footer">
