@@ -312,3 +312,660 @@
 .tribute-content .read-more:hover {
   color: #d4af37;
 }
+
+/* ─── Pillar Hero ────────────────────────────
+   Hero section for pillar pages.
+   ───────────────────────────────────────── */
+.pillar-hero {
+  position: relative;
+  width: 100%;
+  min-height: 560px;
+  background:
+    linear-gradient(
+      rgba(0,0,0,.65),
+      rgba(0,0,0,.35)
+    ),
+    url("../images/handcrafted-pet-memorial-stones.webp");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+}
+
+.pillar-hero .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 20px 56px;
+  color: white;
+}
+
+.hero-breadcrumbs {
+  margin-bottom: 48px;
+  font-size: 14px;
+  color: rgba(255,255,255,.92);
+}
+
+.hero-breadcrumbs a {
+  color: white;
+  text-decoration: none;
+}
+
+.hero-breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+.pillar-hero h1 {
+  font-size: 44px;
+  margin-bottom: 16px;
+  color: white;
+}
+
+.pillar-hero p {
+  font-size: 18px;
+  line-height: 1.5;
+  max-width: 560px;
+  margin-bottom: 28px;
+  color: white;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Hero button styles */
+.pillar-hero .btn-primary {
+  background: #c49a5c;
+  color: white;
+  padding: 12px 20px;
+  text-decoration: none;
+  border-radius: 4px;
+  margin-right: 12px;
+  display: inline-block;
+}
+
+.pillar-hero .btn-primary:hover {
+  background: #b0884f;
+}
+
+.pillar-hero .btn-outline {
+  border: 2px solid white;
+  color: white;
+  padding: 12px 20px;
+  text-decoration: none;
+  border-radius: 4px;
+  display: inline-block;
+  background: transparent;
+}
+
+.pillar-hero .btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ─── Pillar Section ────────────────────────
+   Content sections for pillar pages.
+   ───────────────────────────────────────── */
+.pillar-section {
+  padding: 40px 0;
+}
+
+.pillar-section img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ─── Container Override for Pillar Pages ─── */
+.pillar-section .container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 0 20px;
+}
+
+/* ─── Section Spacing ────────────────────────
+   Standard section spacing for content areas.
+   ───────────────────────────────────────── */
+.section {
+  padding: 32px 20px;
+}
+
+.section .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.section p {
+  margin-bottom: 16px;
+}
+
+.section h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+/* ─── Memorial Grid Wrapper ──────────────────
+   Container to limit grid width for visual balance.
+   ───────────────────────────────────────── */
+.memorial-grid-wrapper {
+  max-width: 1050px;
+  margin: 0 auto;
+  margin-top: 24px;
+}
+
+/* ─── Memorial Grid ──────────────────────────
+   Grid layout for memorial stone cards.
+   ───────────────────────────────────────── */
+.memorial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+}
+
+.memorial-grid .review-card {
+  text-align: center;
+}
+
+.memorial-grid .review-card h3 {
+  text-align: center;
+}
+
+.memorial-grid .review-card p {
+  text-align: center;
+}
+
+.memorial-grid .review-card img {
+  max-height: 180px;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  margin: 12px auto 0;
+  display: block;
+}
+
+/* ─── Text Column ───────────────────────────
+   Narrow text column for better readability.
+   ───────────────────────────────────────── */
+.text-column {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ─── Comparison Table ───────────────────────
+   Material comparison table styling.
+   ───────────────────────────────────────── */
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.comparison-table th {
+  font-weight: 600;
+  background: #f7f7f7;
+}
+
+.comparison-table tr:hover {
+  background: #fafafa;
+}
+
+/* ─── Reviews Section ───────────────────────
+   Centered trust and navigation block for reviews.
+   ───────────────────────────────────────── */
+.reviews-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.review-links {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.review-link {
+  display: block;
+  padding: 16px;
+  border-radius: 10px;
+  background: #f8f8f8;
+  text-decoration: none;
+  font-weight: 600;
+  color: #222;
+}
+
+.review-link:hover {
+  background: #eeeeee;
+}
+
+/* ─── Feature Grid ───────────────────────────
+   Two-column feature card layout.
+   ───────────────────────────────────────── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 48px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  padding: 28px;
+  background: #f8f8f8;
+  border-radius: 12px;
+}
+
+.feature-card h3 {
+  margin-top: 0;
+}
+
+/* ─── Closing Grid ──────────────────────────
+   Side-by-side guide and FAQ layout.
+   ───────────────────────────────────────── */
+.closing-wrapper {
+  max-width: 950px;
+  margin: 0 auto;
+}
+
+.closing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+}
+
+.guide-section ul {
+  margin-top: 16px;
+}
+
+/* ─── Guide Links ─────────────────────────────
+   Guide hub section links.
+   ───────────────────────────────────────── */
+.guide-links {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.guide-links li {
+  margin-bottom: 12px;
+  padding-left: 0;
+}
+
+.guide-links li:before {
+  content: "→ ";
+  color: #c49a5c;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.guide-links a {
+  color: #222;
+  text-decoration: none;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.guide-links a:hover {
+  text-decoration: underline;
+  color: #c49a5c;
+}
+
+.faq-section details {
+  margin-bottom: 12px;
+}
+
+/* ─── Video Embed ────────────────────────────
+   Responsive YouTube video embed.
+   ───────────────────────────────────────── */
+.video-embed-wrap {
+  max-width: 480px;
+  margin: 32px auto 0;
+}
+
+.video-embed {
+  position: relative;
+  width: 100%;
+  padding-top: 177.77%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.video-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ─── Authority Intro ────────────────────────
+   Authority sentence below hero.
+   ───────────────────────────────────────── */
+.authority-intro {
+  padding: 40px 20px;
+}
+
+.authority-intro .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.authority-intro p {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+  font-size: inherit;
+  line-height: 1.6;
+}
+
+/* ─── Authority Expertise ──────────────────────
+   Handcrafted expertise section.
+   ───────────────────────────────────────── */
+.authority-expertise {
+  padding: 32px 20px;
+}
+
+.authority-expertise .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.authority-expertise h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.authority-expertise p {
+  max-width: 720px;
+  margin: 0 auto 16px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.authority-expertise p:last-child {
+  margin-bottom: 0;
+}
+
+/* ─── Featured In ────────────────────────────
+   Media mentions section.
+   ───────────────────────────────────────── */
+.featured-in {
+  padding: 32px 20px;
+}
+
+.featured-in .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.featured-in {
+  padding-top: 20px;
+}
+
+.featured-in h2 {
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.featured-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.featured-item {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.featured-item:last-child {
+  border-bottom: none;
+}
+
+.featured-item a {
+  color: inherit;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.featured-item a:hover {
+  color: #2c5282;
+}
+
+.featured-date {
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: 0.9em;
+  color: #666;
+}
+
+/* ─── Trust Section ──────────────────────────
+   Why families trust section.
+   ───────────────────────────────────────── */
+.trust-section {
+  padding: 32px 20px;
+}
+
+.trust-section .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.trust-section h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.trust-list {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 24px;
+}
+
+.trust-list li {
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.trust-list li:last-child {
+  margin-bottom: 0;
+}
+
+.trust-wrapper {
+  max-width: 950px;
+  margin: 0 auto;
+}
+
+.trust-featured-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.featured-in h3 {
+  margin-top: 0;
+}
+
+.featured-item {
+  margin-bottom: 20px;
+}
+
+/* ─── Mobile Adjustments ──────────────────── */
+@media (max-width: 768px) {
+  /* Prevent horizontal scrolling */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Hero adjustments */
+  .pillar-hero {
+    height: auto;
+    min-height: 360px;
+  }
+
+  .pillar-hero .container {
+    padding: 28px 15px 40px;
+  }
+
+  .pillar-hero-overlay {
+    padding: 30px 20px;
+  }
+
+  .pillar-hero h1 {
+    font-size: 28px;
+  }
+
+  .pillar-hero p {
+    font-size: 15px;
+  }
+
+  /* Section spacing */
+  .pillar-section {
+    padding: 30px 0;
+  }
+
+  .section {
+    padding: 24px 15px;
+  }
+
+  /* Container padding */
+  .pillar-section .container,
+  .section .container,
+  .trust-section .container,
+  .authority-intro .container,
+  .featured-in .container {
+    padding: 0 15px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Grids stack to single column */
+  .memorial-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .review-links {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .closing-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .trust-featured-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  /* Wrapper max-widths */
+  .memorial-grid-wrapper,
+  .trust-wrapper,
+  .closing-wrapper {
+    max-width: 100%;
+    padding: 0 15px;
+    box-sizing: border-box;
+  }
+
+  /* Text columns */
+  .text-column {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .reviews-inner {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  /* Video embed */
+  .video-embed-wrap {
+    max-width: 100%;
+    padding: 0 15px;
+    box-sizing: border-box;
+  }
+
+  /* Feature cards */
+  .feature-card {
+    padding: 20px;
+  }
+
+  /* Trust section spacing */
+  .trust-section {
+    padding: 24px 15px;
+  }
+
+  /* Ensure images don't overflow */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Prevent text overflow */
+  h1, h2, h3, p, a, li {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Hero buttons stack on mobile */
+  .hero-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hero-buttons .btn-primary,
+  .hero-buttons .btn-outline {
+    width: 100%;
+    text-align: center;
+  }
+
+  .authority-expertise {
+    padding: 24px 15px;
+  }
+
+  .authority-expertise .container {
+    padding: 0 15px;
+  }
+
+  .guide-links {
+    padding: 0 15px;
+  }
+
+  .comparison-table {
+    font-size: 0.85rem;
+  }
+
+  .comparison-table th,
+  .comparison-table td {
+    padding: 8px 10px;
+  }
+}

@@ -1041,3 +1041,15 @@ body {
 .tribute-archive-link {
   margin-bottom: 20px;
 }
+
+/* Contextual internal link to pet memorial stones pillar */
+.tribute-context {
+  margin-top: 40px;
+  font-size: 0.95rem;
+  color: #555;
+  text-align: center;
+}
+
+.tribute-context a {
+  font-weight: 500;
+}
