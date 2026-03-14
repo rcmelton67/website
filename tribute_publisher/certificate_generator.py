@@ -7,7 +7,13 @@ Overlays pet photo, name, life dates, and tribute message.
 
 import os
 import re
+import time
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+# Template caching for performance
+_cached_template = None
+_cached_template_path = None
+_cached_template_mtime = None
 
 
 def compose_rounded_photo(
@@ -436,14 +442,14 @@ def generate_certificate(
     # ==========================================
     PHOTO_SIZE = int(780 * SCALE_FACTOR)  # Scaled square image
     PHOTO_X = CENTER_X - (PHOTO_SIZE / 2)  # Centered horizontally
-    PHOTO_Y = int((560 + 120 - 100 + 25 + 20 - 80) * SCALE_FACTOR)  # Scaled position (moved up 80px)
+    PHOTO_Y = int((560 + 120 - 100 + 25 + 20 - 80 + 140) * SCALE_FACTOR)  # Scaled position (moved down 140px)
     PHOTO_CORNER_RADIUS = int(70 * SCALE_FACTOR)  # Scaled rounded corners
     
     # ==========================================
     # Pet Name Placement (anchored below photo, SCALED)
     # ==========================================
     NAME_CENTER_X = CENTER_X
-    NAME_Y = int(1460 * SCALE_FACTOR)  # Scaled position
+    NAME_Y = int((1460 + 140 - 100) * SCALE_FACTOR)  # Scaled position (moved up 100px from previous)
     FONT_NAME_SIZE = int(180 * SCALE_FACTOR)  # Scaled font size
     
     # ==========================================
@@ -452,7 +458,7 @@ def generate_certificate(
     MAX_CERT_MESSAGE = 300  # Character limit (not scaled)
     TEXT_WIDTH = int(2600 * SCALE_FACTOR)  # Scaled wrap width
     MESSAGE_CENTER_X = CENTER_X
-    MESSAGE_Y = int(1700 * SCALE_FACTOR)  # Scaled position
+    MESSAGE_Y = int((1700 + 140 - 100) * SCALE_FACTOR)  # Scaled position (moved up 100px from previous)
     FONT_MESSAGE_SIZE = int(72 * SCALE_FACTOR)  # Scaled font size
     LINE_HEIGHT = int(90 * SCALE_FACTOR)  # Scaled line height
     MAX_LINES = 4  # Maximum lines (not scaled)
@@ -461,17 +467,17 @@ def generate_certificate(
     # Dates Placement (anchored below message, SCALED)
     # ==========================================
     DATES_CENTER_X = CENTER_X
-    DATES_Y = int(2140 * SCALE_FACTOR)  # Scaled position
+    DATES_Y = int((2140 + 140 - 140 - 40) * SCALE_FACTOR)  # Scaled position (moved up 40px more)
     FONT_DATES_SIZE = int(95 * SCALE_FACTOR)  # Scaled font size
     
-    # Get template path (use certificate_background.png - divider already removed permanently)
+    # Get template path (use certificate_template.png with decorative divider)
     if template_path is None:
         module_dir = os.path.dirname(os.path.abspath(__file__))
-        # Use certificate_background.png (permanently processed template without divider)
-        template_path = os.path.join(module_dir, "templates", "certificate_background.png")
-        # Fallback to certificate_template.png only if background doesn't exist
+        # Use certificate_template.png (original template with decorative divider)
+        template_path = os.path.join(module_dir, "templates", "certificate_template.png")
+        # Fallback to certificate_background.png if template doesn't exist
         if not os.path.exists(template_path):
-            template_path = os.path.join(module_dir, "templates", "certificate_template.png")
+            template_path = os.path.join(module_dir, "templates", "certificate_background.png")
     
     if not os.path.exists(template_path):
         raise FileNotFoundError(f"Certificate template not found: {template_path}")
@@ -759,10 +765,11 @@ def generate_certificate(
         name_width = name_bbox[2] - name_bbox[0]
         name_x = int(NAME_CENTER_X - name_width / 2)
         # PIL text is drawn from top-left at ABSOLUTE Y position
-        draw.text((name_x, int(NAME_Y)), pet_name, font=name_font, fill=(0, 0, 0))
+        # Use warm brown color to match embedded template text
+        draw.text((name_x, int(NAME_Y)), pet_name, font=name_font, fill=(75, 50, 35))
     else:
         # Fallback if font not loaded
-        draw.text((int(NAME_CENTER_X), int(NAME_Y)), pet_name, fill=(0, 0, 0))
+        draw.text((int(NAME_CENTER_X), int(NAME_Y)), pet_name, fill=(75, 50, 35))
     
     # ==========================================
     # Draw Tribute Message (ABSOLUTE position, centered, wrapped, max 3 lines)
@@ -776,13 +783,15 @@ def generate_certificate(
             line_y = int(MESSAGE_Y + (i * LINE_HEIGHT))
             
             if line_y < CANVAS_HEIGHT - SAFE_MARGIN:  # Ensure within safe print zone
-                draw.text((line_x, line_y), line, font=message_font, fill=(70, 45, 30))  # Lightened to match parchment
+                # Use warm brown color to match embedded template text
+                draw.text((line_x, line_y), line, font=message_font, fill=(75, 50, 35))
     else:
         # Fallback if font not loaded
         for i, line in enumerate(message_lines):
             line_y = int(MESSAGE_Y + (i * LINE_HEIGHT))
             if line_y < CANVAS_HEIGHT - SAFE_MARGIN:
-                draw.text((int(MESSAGE_CENTER_X), line_y), line, fill=(70, 45, 30))  # Lightened to match parchment
+                # Use warm brown color to match embedded template text
+                draw.text((int(MESSAGE_CENTER_X), line_y), line, fill=(75, 50, 35))
     
     # ==========================================
     # Draw Life Dates (centered, lighter color)
@@ -798,11 +807,11 @@ def generate_certificate(
         dates_width = dates_bbox[2] - dates_bbox[0]
         dates_x = int(DATES_CENTER_X - dates_width / 2)
         # PIL text is drawn from top-left at ABSOLUTE DATES_Y position
-        # Use lighter color (#2f2f2f) for dates to feel like a closing signature line
-        draw.text((dates_x, int(DATES_Y)), dates_formatted, font=dates_font, fill=(0x2f, 0x2f, 0x2f))
+        # Use warm brown color to match embedded template text (slightly lighter for dates)
+        draw.text((dates_x, int(DATES_Y)), dates_formatted, font=dates_font, fill=(80, 55, 40))
     else:
         # Fallback if font not loaded
-        draw.text((int(DATES_CENTER_X), int(DATES_Y)), dates_formatted, fill=(0x2f, 0x2f, 0x2f))
+        draw.text((int(DATES_CENTER_X), int(DATES_Y)), dates_formatted, fill=(80, 55, 40))
     
     # ==========================================
     # Export: Save as PNG (preview) and PDF (download/print)
