@@ -16,6 +16,17 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
 from PIL import Image
 
+# Certificate generator
+try:
+    from certificate_generator import generate_certificate
+except ImportError:
+    try:
+        from .certificate_generator import generate_certificate
+    except ImportError:
+        # Certificate generation not available
+        def generate_certificate(*args, **kwargs):
+            raise ImportError("Certificate generation requires reportlab and PyPDF2. Install with: pip install reportlab PyPDF2")
+
 # ----------------------------
 # CONFIG (edit if needed)
 # ----------------------------
@@ -1476,6 +1487,33 @@ def rebuild_single_tribute_page(entry: dict, tribute_message_override: str = "")
     verify_safe_output_path(index_path)
     with open(index_path, "w", encoding="utf-8") as f:
         f.write(tribute_html)
+    
+    # Generate certificate PDF
+    try:
+        # Get photo path if available
+        photo_path = None
+        if image_filename and not is_placeholder_image:
+            photo_path = os.path.join(tribute_folder, image_filename)
+        
+        # Get tribute message text (strip HTML)
+        tribute_message_text = re.sub(r"<[^>]+>", " ", tribute_message_html)
+        tribute_message_text = re.sub(r"\s+", " ", tribute_message_text).strip()
+        
+        # Generate certificate
+        certificate_path = generate_certificate(
+            pet_name=entry.get("pet_name", ""),
+            life_dates=entry.get("years_pretty", ""),
+            tribute_message=tribute_message_text or entry.get("excerpt", ""),
+            pet_photo_path=photo_path,
+            output_folder=tribute_folder,
+            tribute=entry  # Pass tribute dict for certificate_text field
+        )
+        print(f"[certificate] Generated: {certificate_path}")
+    except Exception as e:
+        import traceback
+        print(f"[certificate] ERROR: Could not generate certificate: {e}")
+        print(f"[certificate] Traceback:")
+        traceback.print_exc()
 
 
 def tribute_message_html_to_text(message_html: str) -> str:
@@ -1557,6 +1595,12 @@ class TributePublisherApp:
         self.root.title("Melton Memorials — Tribute Publisher")
         self.root.geometry("1380x920")
         self.root.minsize(1220, 760)
+        # Open window maximized
+        self.root.state('zoomed')  # Windows
+        try:
+            self.root.attributes('-zoomed', True)  # Linux
+        except:
+            pass
         self.last_tribute_url = ""
         self.last_email = ""
         self.last_first_name = ""
@@ -1588,17 +1632,17 @@ class TributePublisherApp:
         self.pet_type = tk.Entry(create_frame, width=44)
         self.pet_type.grid(row=1, column=1, sticky="w", **pad)
 
-        tk.Label(create_frame, text="First Name (optional)").grid(row=9, column=0, sticky="w", **pad)
+        tk.Label(create_frame, text="First Name (optional)").grid(row=10, column=0, sticky="w", **pad)
         self.first_name = tk.Entry(create_frame, width=44)
-        self.first_name.grid(row=9, column=1, sticky="w", **pad)
+        self.first_name.grid(row=10, column=1, sticky="w", **pad)
 
-        tk.Label(create_frame, text="State (optional)").grid(row=10, column=0, sticky="w", **pad)
+        tk.Label(create_frame, text="State (optional)").grid(row=11, column=0, sticky="w", **pad)
         self.state = tk.Entry(create_frame, width=44)
-        self.state.grid(row=10, column=1, sticky="w", **pad)
+        self.state.grid(row=11, column=1, sticky="w", **pad)
 
-        tk.Label(create_frame, text="Email (optional)").grid(row=11, column=0, sticky="w", **pad)
+        tk.Label(create_frame, text="Email (optional)").grid(row=12, column=0, sticky="w", **pad)
         self.email = tk.Entry(create_frame, width=44)
-        self.email.grid(row=11, column=1, sticky="w", **pad)
+        self.email.grid(row=12, column=1, sticky="w", **pad)
         self.email_sent_var = tk.BooleanVar(value=False)
         self.email_sent_check = tk.Checkbutton(
             create_frame,
@@ -1607,7 +1651,7 @@ class TributePublisherApp:
             onvalue=True,
             offvalue=False,
         )
-        self.email_sent_check.grid(row=12, column=1, sticky="w", **pad)
+        self.email_sent_check.grid(row=13, column=1, sticky="w", **pad)
 
         tk.Label(create_frame, text="Breed (optional)").grid(row=4, column=0, sticky="w", **pad)
         self.breed = tk.Entry(create_frame, width=44)
@@ -1616,6 +1660,46 @@ class TributePublisherApp:
         tk.Label(create_frame, text="Dates of Life (optional, any format)").grid(row=5, column=0, sticky="w", **pad)
         self.years = tk.Entry(create_frame, width=44)
         self.years.grid(row=5, column=1, sticky="w", **pad)
+
+        # Certificate Text field (optional, for manual override)
+        tk.Label(create_frame, text="Certificate Text (optional)").grid(row=6, column=0, sticky="nw", **pad)
+        certificate_frame = tk.Frame(create_frame)
+        certificate_frame.grid(row=6, column=1, sticky="w", **pad)
+        self.certificate_text = tk.Text(certificate_frame, width=62, height=3)
+        self.certificate_text.pack(anchor="w")
+        
+        # Character counter for certificate text
+        self.certificate_char_count = tk.Label(
+            certificate_frame,
+            text="0 / 300 characters",
+            fg="#666",
+            font=("TkDefaultFont", 8),
+        )
+        self.certificate_char_count.pack(anchor="w", pady=(2, 0))
+        
+        # Update counter on text change
+        def update_certificate_counter(event=None):
+            text = self.certificate_text.get("1.0", "end-1c")
+            char_count = len(text)
+            max_chars = 300
+            self.certificate_char_count.config(
+                text=f"{char_count} / {max_chars} characters",
+                fg="#d00" if char_count > max_chars else "#666"
+            )
+        
+        self.certificate_text.bind("<KeyRelease>", update_certificate_counter)
+        self.certificate_text.bind("<Button-1>", update_certificate_counter)
+        update_certificate_counter()  # Initial update
+        
+        certificate_help = tk.Label(
+            create_frame,
+            text="Override certificate message\n(up to 300 chars, max 4 lines)\nLeave empty to auto-extract",
+            justify="left",
+            fg="#666",
+            font=("TkDefaultFont", 8),
+            wraplength=200,
+        )
+        certificate_help.grid(row=6, column=2, sticky="nw", padx=(8, 10), pady=6)
 
         self.formatting_guide_text = (
             "Formatting Guide:\n"
@@ -1626,9 +1710,9 @@ class TributePublisherApp:
             "Keep formatting minimal for best results."
         )
 
-        tk.Label(create_frame, text="Tribute Message *").grid(row=6, column=0, sticky="nw", **pad)
+        tk.Label(create_frame, text="Tribute Message *").grid(row=7, column=0, sticky="nw", **pad)
         message_frame = tk.Frame(create_frame)
-        message_frame.grid(row=6, column=1, sticky="w", **pad)
+        message_frame.grid(row=7, column=1, sticky="w", **pad)
         self.message = tk.Text(message_frame, width=62, height=10)
         self.message.pack(anchor="w")
         self.message_guide = tk.Label(
@@ -1639,12 +1723,12 @@ class TributePublisherApp:
             font=("TkDefaultFont", 8),
             wraplength=300,
         )
-        self.message_guide.grid(row=6, column=2, sticky="nw", padx=(8, 10), pady=6)
+        self.message_guide.grid(row=7, column=2, sticky="nw", padx=(8, 10), pady=6)
 
-        tk.Label(create_frame, text="Photo 1 (optional, recommended)").grid(row=7, column=0, sticky="w", **pad)
+        tk.Label(create_frame, text="Photo 1 (optional, recommended)").grid(row=8, column=0, sticky="w", **pad)
 
         img_row = tk.Frame(create_frame)
-        img_row.grid(row=7, column=1, sticky="w", **pad)
+        img_row.grid(row=8, column=1, sticky="w", **pad)
 
         self.img_label = tk.Label(img_row, textvariable=self.image_path, width=34, anchor="w")
         self.img_label.pack(side="left")
@@ -1654,10 +1738,10 @@ class TributePublisherApp:
         self.btn_clear_image = tk.Button(img_row, text="Clear", command=self.clear_image)
         self.btn_clear_image.pack(side="left")
 
-        tk.Label(create_frame, text="Photo 2 (optional)").grid(row=8, column=0, sticky="w", **pad)
+        tk.Label(create_frame, text="Photo 2 (optional)").grid(row=9, column=0, sticky="w", **pad)
 
         img2_row = tk.Frame(create_frame)
-        img2_row.grid(row=8, column=1, sticky="w", **pad)
+        img2_row.grid(row=9, column=1, sticky="w", **pad)
 
         self.img2_label = tk.Label(img2_row, textvariable=self.image2_path, width=34, anchor="w")
         self.img2_label.pack(side="left")
@@ -1894,6 +1978,40 @@ class TributePublisherApp:
         widgets["years_pretty"].grid(row=row, column=1, sticky="w", **pad)
         row += 1
 
+        # Certificate Text field (optional, for manual override)
+        tk.Label(dialog, text="Certificate Text (optional)").grid(row=row, column=0, sticky="nw", **pad)
+        cert_frame = tk.Frame(dialog)
+        cert_frame.grid(row=row, column=1, sticky="w", **pad)
+        widgets["certificate_text"] = tk.Text(cert_frame, width=62, height=3)
+        widgets["certificate_text"].pack(anchor="w")
+        certificate_text_value = str(entry.get("certificate_text", "") or "").strip()
+        widgets["certificate_text"].insert("1.0", certificate_text_value)
+        
+        # Character counter for certificate text
+        cert_char_count = tk.Label(
+            cert_frame,
+            text="0 / 300 characters",
+            fg="#666",
+            font=("TkDefaultFont", 8),
+        )
+        cert_char_count.pack(anchor="w", pady=(2, 0))
+        
+        # Update counter on text change
+        def update_cert_counter(event=None):
+            text = widgets["certificate_text"].get("1.0", "end-1c")
+            char_count = len(text)
+            max_chars = 300
+            cert_char_count.config(
+                text=f"{char_count} / {max_chars} characters",
+                fg="#d00" if char_count > max_chars else "#666"
+            )
+        
+        widgets["certificate_text"].bind("<KeyRelease>", update_cert_counter)
+        widgets["certificate_text"].bind("<Button-1>", update_cert_counter)
+        update_cert_counter()  # Initial update
+        
+        row += 1
+
         tk.Label(dialog, text="Tribute Message *").grid(row=row, column=0, sticky="nw", **pad)
         text_frame = tk.Frame(dialog)
         text_frame.grid(row=row, column=1, sticky="w", **pad)
@@ -2044,6 +2162,14 @@ class TributePublisherApp:
             entry["email_sent"] = widgets["email_sent_var"].get() is True
             entry["excerpt"] = summarize_excerpt(strip_markdown_for_excerpt(edited_tribute_message))
             entry["full_message"] = edited_tribute_message  # Store full message for tribute pages
+            
+            # Save certificate text if provided
+            if "certificate_text" in widgets:
+                certificate_text = widgets["certificate_text"].get("1.0", "end").strip()
+                if certificate_text:
+                    entry["certificate_text"] = certificate_text
+                elif "certificate_text" in entry:
+                    del entry["certificate_text"]  # Remove if cleared
 
             image1_filename = resolve_image_field("image_filename", f"{slug}.webp", "Image 1")
             if image1_filename is None:
@@ -2065,10 +2191,20 @@ class TributePublisherApp:
             self.refresh_email_button_state()
 
             save_data(tributes)
+            
+            # Rebuild only the updated tribute page (fast)
             rebuild_single_tribute_page(entry, tribute_message_override=edited_tribute_message)
+            
+            # Rebuild archives and sitemap (these are slower operations)
+            # Note: These operations rebuild all pages, which can be slow with many tributes
+            print("[save] Rebuilding archive pages...")
             rebuild_archive_pages(tributes)
+            print("[save] Rebuilding pet type archives...")
             rebuild_pet_type_archives(tributes)
+            print("[save] Generating sitemap...")
             generate_sitemap(tributes)
+            print("[save] Complete!")
+            
             self.refresh_tribute_table()
             messagebox.showinfo("Saved", f'Updated tribute "{slug}".')
             dialog.destroy()
@@ -2425,6 +2561,32 @@ Alma, Arkansas
         rebuild_pet_type_archives(entries)
         generate_sitemap(entries)
         self.refresh_tribute_table()
+
+        # Generate certificate PDF
+        try:
+            # Get photo path if available
+            photo_path = None
+            if img_filename:
+                photo_path = os.path.join(tribute_folder, img_filename)
+            
+            # Generate certificate
+            # Build tribute dict for certificate_text field support
+            tribute_dict = {
+                "pet_name": pet_name,
+                "years_pretty": years_pretty,
+                "certificate_text": self.certificate_text.get("1.0", "end").strip() if hasattr(self, "certificate_text") else ""
+            }
+            certificate_path = generate_certificate(
+                pet_name=pet_name,
+                life_dates=years_pretty,
+                tribute_message=tribute_msg,
+                pet_photo_path=photo_path,
+                output_folder=tribute_folder,
+                tribute=tribute_dict  # Pass tribute dict for certificate_text field
+            )
+            print(f"[certificate] Generated: {certificate_path}")
+        except Exception as e:
+            print(f"[certificate] Warning: Could not generate certificate: {e}")
 
         self.last_tribute_url = page_url
         self.last_email = email
