@@ -436,7 +436,7 @@ def generate_certificate(
     # ==========================================
     PHOTO_SIZE = int(780 * SCALE_FACTOR)  # Scaled square image
     PHOTO_X = CENTER_X - (PHOTO_SIZE / 2)  # Centered horizontally
-    PHOTO_Y = int((560 + 120 - 100 + 25 + 20) * SCALE_FACTOR)  # Scaled position
+    PHOTO_Y = int((560 + 120 - 100 + 25 + 20 - 80) * SCALE_FACTOR)  # Scaled position (moved up 80px)
     PHOTO_CORNER_RADIUS = int(70 * SCALE_FACTOR)  # Scaled rounded corners
     
     # ==========================================
@@ -464,12 +464,12 @@ def generate_certificate(
     DATES_Y = int(2140 * SCALE_FACTOR)  # Scaled position
     FONT_DATES_SIZE = int(95 * SCALE_FACTOR)  # Scaled font size
     
-    # Get template path (try certificate_background.png first, fallback to certificate_template.png)
+    # Get template path (use certificate_background.png - divider already removed permanently)
     if template_path is None:
         module_dir = os.path.dirname(os.path.abspath(__file__))
-        # Try certificate_background.png first
+        # Use certificate_background.png (permanently processed template without divider)
         template_path = os.path.join(module_dir, "templates", "certificate_background.png")
-        # Fallback to certificate_template.png if background doesn't exist
+        # Fallback to certificate_template.png only if background doesn't exist
         if not os.path.exists(template_path):
             template_path = os.path.join(module_dir, "templates", "certificate_template.png")
     
@@ -499,6 +499,7 @@ def generate_certificate(
         perf_log.append(f"Template (cached): {time.time() - t0:.2f}s")
     else:
         # Load template and cache it
+        # Note: certificate_background.png should already have divider removed
         template_image = Image.open(template_path)
         if template_image.mode != "RGB":
             template_image = template_image.convert("RGB")
@@ -775,13 +776,13 @@ def generate_certificate(
             line_y = int(MESSAGE_Y + (i * LINE_HEIGHT))
             
             if line_y < CANVAS_HEIGHT - SAFE_MARGIN:  # Ensure within safe print zone
-                draw.text((line_x, line_y), line, font=message_font, fill=(0, 0, 0))
+                draw.text((line_x, line_y), line, font=message_font, fill=(70, 45, 30))  # Lightened to match parchment
     else:
         # Fallback if font not loaded
         for i, line in enumerate(message_lines):
             line_y = int(MESSAGE_Y + (i * LINE_HEIGHT))
             if line_y < CANVAS_HEIGHT - SAFE_MARGIN:
-                draw.text((int(MESSAGE_CENTER_X), line_y), line, fill=(0, 0, 0))
+                draw.text((int(MESSAGE_CENTER_X), line_y), line, fill=(70, 45, 30))  # Lightened to match parchment
     
     # ==========================================
     # Draw Life Dates (centered, lighter color)
