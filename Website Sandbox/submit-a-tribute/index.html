@@ -1,383 +1,563 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit a Tribute | Melton Memorials</title>
-    <meta name="robots" content="noindex, follow">
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/css/styles.css?v=hardreset3">
-    <link rel="stylesheet" href="../../assets/css/styles.css?v=hardreset3">
-    <link rel="stylesheet" href="../../assets/css/memorial-theme.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Submit Your Pet's Tribute</title>
+  <style>
+    .mm-tribute-submit {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 30px;
+      font-family: inherit;
+      position: relative;
+    }
+
+    .mm-tribute-submit::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100vw;
+      min-height: 100%;
+      background-color: #f0ebe6;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.12'/%3E%3C/svg%3E");
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .mm-tribute-submit .mm-tribute-intro {
+      margin-bottom: 70px;
+    }
+
+    .mm-tribute-submit .mm-tribute-grid {
+      display: grid;
+      grid-template-columns: 520px 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .mm-tribute-submit .mm-tribute-cert img {
+      width: 100%;
+      border-radius: 6px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    }
+
+    .mm-tribute-submit .mm-cert-caption {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      color: #888;
+      font-style: italic;
+    }
+
+    .mm-tribute-submit .mm-tribute-title {
+      text-align: center;
+      font-size: 2.8rem;
+      line-height: 1.2;
+      margin-bottom: 50px;
+      color: #2f3b45;
+    }
+
+    .mm-tribute-submit .mm-nowrap {
+      white-space: nowrap;
+    }
+
+    .mm-tribute-submit .mm-tribute-text p {
+      font-size: 1.1rem;
+      line-height: 1.75;
+      color: #444;
+      margin-bottom: 22px;
+      text-transform: none;
+    }
+
+    .mm-tribute-submit .mm-form-title {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: #2f3b45;
+    }
+
+    /* ───────────────────────────────────────
+       HERO SECTION – MOBILE SINGLE COLUMN
+    ─────────────────────────────────────── */
+    .mm-tribute-submit .mm-submit-hero {
+      padding: 20px 0;
+    }
+
+    .mm-tribute-submit .mm-submit-hero-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    @media (min-width: 960px) {
+      .mm-tribute-submit .mm-submit-hero-grid {
+        grid-template-columns: minmax(420px, 480px) 1fr;
+        gap: 56px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .mm-tribute-submit {
+        padding: 40px 20px;
+      }
+
+      .mm-tribute-submit .mm-tribute-intro {
+        margin-bottom: 50px;
+      }
+
+      .mm-tribute-submit .mm-tribute-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+      }
+
+      .mm-tribute-submit .mm-tribute-title {
+        font-size: 2rem;
+        margin-bottom: 30px;
+      }
+
+      .mm-tribute-submit .mm-tribute-text {
+        text-align: left;
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
+      .mm-tribute-submit .mm-tribute-text p {
+        font-size: 1rem;
+        margin-bottom: 18px;
+      }
+
+      .mm-tribute-submit .mm-tribute-cert img {
+        max-width: 100%;
+      }
+
+      .mm-tribute-submit .mm-form-title {
+        font-size: 1.6rem;
+        margin-bottom: 24px;
+      }
+
+      .mm-tribute-submit .mm-submit-hero {
+        padding: 15px 0;
+      }
+    }
+
+    .mm-tribute-submit .mm-submit-hero-preview,
+    .mm-tribute-submit .mm-submit-hero-content {
+      min-width: 0;
+    }
+
+    .mm-tribute-submit .mm-submit-hero-preview {
+      max-width: 420px;
+      position: relative;
+      margin: 0 auto;
+    }
+
+    .mm-tribute-submit .mm-submit-hero-preview::before {
+      content: "";
+      position: absolute;
+      inset: -20px;
+      background: rgba(255,255,255,0.35);
+      border-radius: 20px;
+      z-index: -1;
+    }
+
+    .mm-tribute-submit .mm-submit-hero-content h1 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 2.8rem;
+      line-height: 1.15;
+      color: #2f3b45;
+    }
+
+    .mm-tribute-submit .mm-hero-subtext {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 0;
+      max-width: 100%;
+    }
+
+    .mm-tribute-submit .mm-submit-hero-preview .mm-preview-card {
+      box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+      transform: translateY(6px);
+      transition: 0.3s ease;
+    }
+
+    .mm-tribute-submit .mm-submit-hero-preview .mm-preview-card:hover {
+      transform: translateY(2px);
+    }
+
+    .mm-tribute-submit .mm-hero-form,
+    .mm-tribute-submit .mm-hero-form .form-card {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .mm-tribute-submit .mm-preview-text-content {
+      max-width: 420px;
+      margin: 60px auto 0;
+      text-align: center;
+    }
+
+    .mm-tribute-submit .mm-preview-text-content h2 {
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+      color: #2f3b45;
+    }
+
+    .mm-tribute-submit .mm-preview-text-content p {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 16px;
+    }
+
+    .mm-tribute-submit .mm-preview-certificate {
+      max-width: 420px;
+      margin: 40px auto 0;
+      text-align: center;
+    }
+
+    .mm-tribute-submit .mm-preview-certificate img {
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    }
+
+    /* ───────────────────────────────────────
+       PREVIEW CARD STYLES
+    ─────────────────────────────────────── */
+    .mm-tribute-submit .mm-preview-card {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 14px 34px rgba(0,0,0,0.10);
+    }
+
+    .mm-tribute-submit .mm-preview-image-wrap {
+      aspect-ratio: 4 / 3;
+      background: #f3f0ea;
+      overflow: hidden;
+      min-height: 200px;
+      max-height: 600px;
+    }
+
+    .mm-tribute-submit .mm-preview-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: var(--preview-pos-x, 50%) var(--preview-pos-y, 30%);
+      display: block;
+    }
+
+    .mm-tribute-submit .mm-preview-body {
+      padding: 22px 22px 24px;
+    }
+
+    .mm-tribute-submit .mm-preview-body h3 {
+      margin: 0 0 8px;
+      font-size: 1.8rem;
+      line-height: 1.2;
+      color: #2f3b45;
+    }
+
+    .mm-tribute-submit .mm-preview-meta {
+      margin: 0 0 6px;
+      font-size: 1rem;
+      color: #5a5a5a;
+    }
+
+    .mm-tribute-submit .mm-preview-dates {
+      margin: 0 0 16px;
+      font-size: 0.98rem;
+      color: #777;
+    }
+
+    .mm-tribute-submit .mm-preview-message {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #444;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* Form styling */
+    .mm-tribute-submit .form-group {
+      margin-bottom: 24px;
+    }
+
+    .mm-tribute-submit label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .mm-tribute-submit .required {
+      color: #c00;
+    }
+
+    .mm-tribute-submit input[type="text"],
+    .mm-tribute-submit input[type="email"],
+    .mm-tribute-submit select,
+    .mm-tribute-submit textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    .mm-tribute-submit input[type="file"] {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      border: 1px dashed #ccc;
+      border-radius: 4px;
+      background: #f9f9f9;
+    }
+
+    .mm-tribute-submit .form-row {
+      display: flex;
+      gap: 20px;
+    }
+
+    .mm-tribute-submit .half {
+      flex: 1;
+    }
+
+    .mm-tribute-submit .btn-primary {
+      background: #2c3e50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      transition: background 0.3s ease;
+      padding: 14px 40px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: inline-block;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .mm-tribute-submit .btn-primary:hover {
+      background: #1a252f;
+    }
+
+    @media (max-width: 600px) {
+      .mm-tribute-submit {
+        padding: 20px 15px 30px;
+      }
+
+      .mm-tribute-submit .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .mm-tribute-submit .form-group {
+        margin-bottom: 20px;
+      }
+
+      .mm-tribute-submit input, .mm-tribute-submit select, .mm-tribute-submit textarea {
+        padding: 14px;
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mm-tribute-submit {
+        padding: 24px 16px 30px;
+        overflow-x: hidden;
+        box-sizing: border-box;
+      }
+
+      /* Stack order: content (headline + intro + form) then preview */
+      .mm-tribute-submit .mm-submit-hero-content {
+        order: 1;
+        text-align: center;
+      }
+
+      /* Keep form body left-aligned while outer hero text is centered */
+      .mm-tribute-submit .mm-hero-form,
+      .mm-tribute-submit .mm-hero-form .form-group,
+      .mm-tribute-submit .mm-hero-form label {
+        text-align: left;
+      }
+
+      .mm-tribute-submit .mm-hero-form {
+        max-width: 380px;
+        margin: 20px auto 0;
+      }
+
+      .mm-tribute-submit .mm-submit-hero-preview {
+        order: 2;
+        max-width: 320px;
+        margin: 32px auto 0;
+      }
+
+      .mm-tribute-submit .mm-preview-card {
+        max-width: 320px;
+        margin: 0 auto;
+      }
+
+      .mm-tribute-submit .mm-preview-text-content {
+        text-align: center;
+      }
+
+      .mm-tribute-submit .btn-primary {
+        width: auto;
+        max-width: 260px;
+      }
+    }
+  </style>
 </head>
-
 <body>
-    <header class="site-header">
-<div class="nav-container">
-        <div class="logo">
-            <div class="brand">
-                <a href="../../pages/home/index.html">
-                    <div class="brand-main">
-                        <span class="brand-top">MELTON</span>
-                        <span class="brand-bottom">MEMORIALS</span>
-                    </div>
-                    <div class="brand-tagline">
-                        Love • Honor • Remembrance
-                    </div>
+
+<div class="mm-tribute-submit">
+
+  <!-- Hero Section -->
+  <section class="mm-submit-hero">
+    <div class="mm-submit-hero-grid">
+
+      <!-- Preview Column -->
+      <div class="mm-submit-hero-preview">
+        <div class="mm-preview-card">
+          <div class="mm-preview-image-wrap">
+            <img
+              id="mmPreviewImage"
+              src="data:image/svg+xml,%3Csvg width='400' height='300' viewBox='0 0 400 300' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='400' height='300' fill='%23f3f0ea'/%3E%3Cg transform='translate(200,130) scale(30)' stroke='%23999' fill='none' stroke-width='0.025' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M 0.207063,1.475249 L 0.256555,1.486541 L 0.548399,1.627058 L 0.618983,1.658151 L 0.644183,1.668048 L 0.672819,1.677218 L 0.701608,1.684911 L 0.730944,1.691540 L 0.760965,1.697309 L 0.791661,1.702319 L 0.822935,1.706615 L 0.854642,1.710211 L 0.886611,1.713104 L 0.918660,1.715273 L 0.950614,1.716687 L 0.982317,1.717302 L 1.013654,1.717052 L 1.044580,1.715842 L 1.075164,1.713521 L 1.104240,1.709996 L 1.130738,1.705671 L 1.155837,1.700768 L 1.180687,1.695035 L 1.205286,1.688409 L 1.229614,1.680840 L 1.253632,1.672287 L 1.277289,1.662730 L 1.300529,1.652166 L 1.323293,1.640612 L 1.345533,1.628104 L 1.367217,1.614687 L 1.388329,1.600415 L 1.408878,1.585340 L 1.428892,1.569513 L 1.448420,1.552972 L 1.467701,1.535585 L 1.485787,1.518235 L 1.503315,1.500262 L 1.520158,1.481770 L 1.536294,1.462766 L 1.551704,1.443257 L 1.566365,1.423254 L 1.580258,1.402771 L 1.593361,1.381823 L 1.605655,1.360432 L 1.617125,1.338617 L 1.627754,1.316404 L 1.637530,1.293819 L 1.646443,1.270888 L 1.654486,1.247639 L 1.661656,1.224101 L 1.667952,1.200302 L 1.673375,1.176268 L 1.677931,1.152026 L 1.681628,1.127600 L 1.684474,1.103012 L 1.686481,1.078283 L 1.687662,1.053430 L 1.688030,1.028468 L 1.687577,1.002046 L 1.684469,0.953105 L 1.678258,0.902464 L 1.669148,0.851574 L 1.657241,0.800446 L 1.642628,0.749069 L 1.625388,0.697424 L 1.605584,0.645484 L 1.583271,0.593217 L 1.558490,0.540592 L 1.531276,0.487577 L 1.501655,0.434144 L 1.469648,0.380265 L 1.435271,0.325916 L 1.398537,0.271077 L 1.359453,0.215730 L 1.318028,0.159861 L 1.274267,0.103457 L 1.228173,0.046510 L 1.179749,-0.010989 L 1.128907,-0.069147 L 1.082039,-0.120744 L 1.035680,-0.169545 L 0.989636,-0.215626 L 0.943688,-0.259088 L 0.897623,-0.300013 L 0.851247,-0.338470 L 0.804383,-0.374511 L 0.756883,-0.408174 L 0.708623,-0.439494 L 0.659507,-0.468505 L 0.609462,-0.495253 L 0.558431,-0.519801 L 0.506362,-0.542234 L 0.453196,-0.562660 L 0.398861,-0.581214 L 0.343480,-0.597978 L 0.312901,-0.606256 L 0.282507,-0.613633 L 0.252004,-0.620186 L 0.221404,-0.625913 L 0.190717,-0.630810 L 0.159954,-0.634874 L 0.129126,-0.638104 L 0.098246,-0.640498 L 0.067326,-0.642055 L 0.036376,-0.642777 L 0.005410,-0.642664 L -0.025561,-0.641716 L -0.056526,-0.639937 L -0.087474,-0.637329 L -0.118393,-0.633896 L -0.149272,-0.629641 L -0.180102,-0.624570 L -0.210874,-0.618686 L -0.241577,-0.611995 L -0.272204,-0.604503 L -0.302747,-0.596215 L -0.333198,-0.587138 L -0.363551,-0.577277 L -0.393799,-0.566640 L -0.423937,-0.555232 L -0.453960,-0.543059 L -0.483863,-0.530127 L -0.513642,-0.516444 L -0.543295,-0.502014 L -0.572817,-0.486843 L -0.602206,-0.470937 L -0.632689,-0.453602 L -0.654251,-0.440281 L -0.677882,-0.424319 L -0.722953,-0.390957 L -0.771147,-0.352168 L -0.820658,-0.309725 L -0.870350,-0.264738 L -0.918870,-0.218396 L -0.964860,-0.171799 L -1.005439,-0.127566 L -1.090721,-0.030251 L -1.350626,0.321266 L -1.387071,0.372471 L -1.418640,0.418552 L -1.448621,0.466089 L -1.476099,0.513876 L -1.501021,0.561978 L -1.523323,0.610444 L -1.542931,0.659308 L -1.559761,0.708581 L -1.573728,0.758251 L -1.584462,0.806969 L -1.589071,0.833391 L -1.592693,0.858582 L -1.595546,0.883822 L -1.597628,0.909099 L -1.598934,0.934398 L -1.599463,0.959706 L -1.599217,0.985006 L -1.598198,1.010285 L -1.596410,1.035528 L -1.593727,1.062043 L -1.586569,1.110892 L -1.576428,1.160017 L -1.564794,1.205349 L -1.551787,1.248569 L -1.537088,1.290539 L -1.520596,1.331247 L -1.502220,1.370654 L -1.481875,1.408697 L -1.459503,1.445283 L -1.435071,1.480300 L -1.408583,1.513621 L -1.380082,1.545113 L -1.349650,1.574658 L -1.317398,1.602158 L -1.283462,1.627549 L -1.247981,1.650805 L -1.211091,1.671940 L -1.171336,1.691788 L -1.146629,1.701926 L -1.121108,1.710325 L -1.095987,1.717115 L -1.070694,1.722764 L -1.045017,1.727455 L -1.018906,1.731238 L -0.992366,1.734088 L -0.966335,1.735856 L -0.940842,1.736736 L -0.915621,1.736833 L -0.889512,1.735921 L -0.862606,1.733777 L -0.835096,1.730271 L -0.807134,1.725375 L -0.778718,1.719126 L -0.749647,1.711572 L -0.719552,1.702721 L -0.687245,1.692308 L -0.618283,1.667883 L -0.535687,1.636406 L -0.437230,1.597481 L -0.347629,1.562637 L -0.268560,1.533935 L -0.233478,1.522052 L -0.200013,1.511346 L -0.168602,1.501954 L -0.139102,1.493813 L -0.111358,1.486855 L -0.085201,1.481006 L -0.060441,1.476187 L -0.036871,1.472319 L -0.014256,1.469324 L 0.007654,1.467133 L 0.029128,1.465685 L 0.050594,1.464931 L 0.072282,1.464811 L 0.094859,1.465232 L 0.144294,1.467723 L 0.165108,1.469447 L 0.183735,1.471465 L 0.197371,1.473395 L 0.207063,1.475249'/%3E%3Cpath d='M 1.478891,-0.021908 C 1.500277,-0.015452 1.562475,-0.010103 1.617110,-0.010021 C 1.759796,-0.009807 1.856867,-0.053591 1.992849,-0.179498 C 2.141426,-0.317067 2.209544,-0.453236 2.258111,-0.709758 C 2.286997,-0.862331 2.259242,-1.109248 2.196978,-1.253622 C 2.148399,-1.366264 2.027995,-1.501686 1.955963,-1.524701 C 1.802190,-1.573834 1.660823,-1.536617 1.516905,-1.409113 C 1.200534,-1.128824 1.046002,-0.625144 1.181727,-0.316635 C 1.239644,-0.184988 1.371336,-0.054376 1.478891,-0.021908'/%3E%3Cpath d='M 0.443710,-0.950002 C 0.498123,-0.921650 0.542579,-0.908318 0.588639,-0.906539 C 0.670317,-0.903384 0.828380,-0.948879 0.892510,-0.994002 C 1.001770,-1.070879 1.151869,-1.334216 1.205068,-1.542364 C 1.301312,-1.918928 1.169952,-2.375424 0.925967,-2.512283 C 0.870574,-2.543355 0.827958,-2.556580 0.763428,-2.562722 C 0.686402,-2.570054 0.666358,-2.566651 0.595420,-2.534202 C 0.510212,-2.495224 0.374559,-2.370943 0.330211,-2.291225 C 0.224864,-2.101860 0.156230,-1.898279 0.134497,-1.710701 C 0.094987,-1.369704 0.217728,-1.067748 0.443710,-0.950002'/%3E%3Cpath d='M -0.730919,-0.984058 C -0.696631,-0.976929 -0.653484,-0.969822 -0.635037,-0.968264 C -0.558054,-0.961762 -0.442849,-0.988708 -0.376281,-1.028786 C -0.289877,-1.080807 -0.207200,-1.194500 -0.153736,-1.334820 C -0.004881,-1.725498 -0.235664,-2.406080 -0.579818,-2.591347 C -0.784597,-2.701584 -1.010113,-2.614550 -1.141942,-2.374405 C -1.194381,-2.278880 -1.208872,-2.227318 -1.238439,-2.031044 C -1.257527,-1.904329 -1.258046,-1.871157 -1.242619,-1.763627 C -1.210651,-1.540804 -1.133196,-1.358208 -0.995666,-1.181453 C -0.909175,-1.070293 -0.817721,-1.002105 -0.730919,-0.984058'/%3E%3Cpath d='M -1.683163,-0.012797 C -1.654628,-0.004738 -1.582611,0.001268 -1.523126,0.000550 C -1.455882,-0.000261 -1.393537,-0.009347 -1.358306,-0.023469 C -1.235579,-0.072664 -1.103454,-0.254045 -1.070394,-0.418713 C -1.011154,-0.713786 -1.228741,-1.156938 -1.539040,-1.373192 C -1.755322,-1.523923 -1.961491,-1.539389 -2.094019,-1.414825 C -2.204455,-1.311026 -2.261477,-1.169127 -2.268753,-0.980001 C -2.277047,-0.764441 -2.220694,-0.536832 -2.116868,-0.366547 C -2.020320,-0.208198 -1.832444,-0.054957 -1.683163,-0.012797'/%3E%3C/g%3E%3Ctext x='200' y='260' font-family='Arial, sans-serif' font-size='16' fill='%23888' text-anchor='middle'%3EYour image will appear here%3C/text%3E%3C/svg%3E"
+              alt="Photo preview placeholder"
+            />
+          </div>
+          <div class="mm-preview-body">
+            <h3 id="mmPreviewName">Your Pet's Name</h3>
+            <p class="mm-preview-meta" id="mmPreviewMeta">Type - Breed</p>
+            <p class="mm-preview-dates" id="mmPreviewDates">Years of Life</p>
+            <div class="mm-preview-message" id="mmPreviewMessage">
+Your tribute message will appear here as you type. Share a favorite memory, what made your pet special, or words you would like remembered.
+            </div>
+          </div>
+        </div>
+
+        <div class="mm-preview-text-content">
+          <h2>A Lasting Keepsake</h2>
+          <p>
+            Every tribute shared here includes a printable Certificate of Remembrance honoring your pet's life.
+          </p>
+          <p>
+            Many families choose to print and frame their certificate as a keepsake for a child's room or family space.
+          </p>
+        </div>
+
+        <div class="mm-preview-certificate">
+          <img src="/memorials/pet-tributes/phoebe-dog-american-akita/certificate.png" alt="Certificate of Remembrance">
+          <p class="mm-certificate-caption">A keepsake you can print and cherish</p>
+        </div>
+      </div>
+
+      <!-- Form Column -->
+      <div class="mm-submit-hero-content">
+        <h1>Honor Your Pet's Memory</h1>
+        <p class="mm-hero-subtext">
+          Create a lasting tribute to share your pet's story and receive a printable Certificate of Remembrance.
+        </p>
+
+        <div class="mm-hero-form" id="mm-tribute-form">
+          <div class="form-card" style="background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #eee; margin-top: 24px;">
+            <form id="tributeForm" enctype="multipart/form-data">
+              <div class="form-group">
+                <label for="petName">Pet Name <span class="required">*</span></label>
+                <input type="text" id="petName" name="petName" required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group half">
+                  <label for="petType">Pet Type <span class="required">*</span></label>
+                  <select id="petType" name="petType" required>
+                    <option value="" disabled selected>Select...</option>
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                    <option value="Horse">Horse</option>
+                    <option value="Bird">Bird</option>
+                    <option value="Reptile">Reptile</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group half">
+                  <label for="breed">Breed</label>
+                  <input type="text" id="breed" name="breed" placeholder="e.g. Labrador">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="yearsTogether">Years Together</label>
+                <input type="text" id="yearsTogether" name="yearsTogether" placeholder="e.g. 2010 - 2024">
+              </div>
+
+              <div class="form-group">
+                <label for="tributeStory">Tribute Message <span class="required">*</span></label>
+                <textarea id="tributeStory" name="tributeStory" rows="6" required placeholder="Share your favorite memory..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="petPhoto">Upload Pet Photo (Optional)</label>
+                <input type="file" id="petPhoto" name="petPhoto" accept="image/*">
+              </div>
+
+              <div class="form-group">
+                <label for="memorialImg">Add Memorial Image (Optional)</label>
+                <input type="file" id="memorialImg" name="memorialImg" accept="image/*">
+                <small style="color: #666; display: block; margin-top: 5px;">Haven't received your memorial yet? No worries! You can always come back and add this image later once it arrives.</small>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group half">
+                  <label for="firstName">First Name <span class="required">*</span></label>
+                  <input type="text" id="firstName" name="firstName" required>
+                </div>
+                <div class="form-group half">
+                  <label for="state">State <span class="required">*</span></label>
+                  <input type="text" id="state" name="state" required placeholder="e.g. Arkansas">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required>
+                <small style="color: #666; display: block; margin-top: 5px;">Your email is for internal use only and will not be published.</small>
+              </div>
+
+              <div style="text-align: center; margin-top: 30px;">
+                <a class="btn btn-primary tribute-submit-btn"
+                   href="https://meltonmemorials.com/pet-tributes/submit/"
+                   target="_blank" rel="noopener"
+                   style="padding: 14px 40px; font-size: 1.1rem;">
+                  Submit Your Pet's Tribute
                 </a>
-            </div>
+                <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">All tributes are reviewed before publication.</p>
+              </div>
+            </form>
+            <div id="submitMessage" style="display:none; text-align: center; margin-top: 20px; font-weight: bold; color: green;"></div>
+          </div>
         </div>
+      </div>
 
-        <button class="mobile-nav-toggle" aria-label="Toggle navigation">
-            <span class="hamburger-bar"></span>
-            <span class="hamburger-bar"></span>
-            <span class="hamburger-bar"></span>
-        </button>
-
-        <nav class="main-nav">
-            <ul class="nav-list">
-                <li><a href="https://meltonmemorials.com/shop/">Memorials</a></li>
-                <li><a href="../../pages/memorials/index.html">Tributes</a></li>
-            </ul>
-        </nav>
     </div>
-</header>
-    <main style="padding-top: 60px; padding-bottom: 80px;">
-        <div class="container" style="max-width: 800px;">
-            <h1
-                style="text-align: center; font-family: 'Libre Baskerville', serif; font-size: 2.5rem; margin-bottom: 1.5rem;">
-                Honor Your Pet’s Memory</h1>
+  </section>
 
-            <div style="text-align: center; margin-bottom: 40px; font-size: 1.1rem; line-height: 1.6;">
-                <p>If you would like to share your pet’s tribute in our memorial gallery, we would be honored.<br>
-                    After approval, your tribute will become part of our permanent remembrance collection.</p>
-            </div>
+</div>
 
-            <div class="form-card"
-                style="background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #eee;">
-                <form id="tributeForm" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="petName">Pet Name <span class="required">*</span></label>
-                        <input type="text" id="petName" name="petName" required>
-                    </div>
+<script src="tribute-preview.js"></script>
 
-                    <div class="form-row">
-                        <div class="form-group half">
-                            <label for="petType">Pet Type <span class="required">*</span></label>
-                            <select id="petType" name="petType" required>
-                                <option value="" disabled selected>Select...</option>
-                                <option value="Dog">Dog</option>
-                                <option value="Cat">Cat</option>
-                                <option value="Horse">Horse</option>
-                                <option value="Bird">Bird</option>
-                                <option value="Reptile">Reptile</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group half">
-                            <label for="breed">Breed</label>
-                            <input type="text" id="breed" name="breed" placeholder="e.g. Labrador">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="yearsTogether">Years Together</label>
-                        <input type="text" id="yearsTogether" name="yearsTogether" placeholder="e.g. 2010 - 2024">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="tributeStory">Tribute Message <span class="required">*</span></label>
-                        <textarea id="tributeStory" name="tributeStory" rows="6" required
-                            placeholder="Share your favorite memory..."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="petPhoto">Upload Pet Photo (Optional)</label>
-                        <input type="file" id="petPhoto" name="petPhoto" accept="image/*">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="memorialImg">Add Memorial Image (Optional)</label>
-                        <input type="file" id="memorialImg" name="memorialImg" accept="image/*">
-                        <small style="color: #666; display: block; margin-top: 5px;">Haven't received your memorial yet?
-                            No worries! You can always come back and add this image later once it arrives.</small>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group half">
-                            <label for="firstName">First Name <span class="required">*</span></label>
-                            <input type="text" id="firstName" name="firstName" required>
-                        </div>
-                        <div class="form-group half">
-                            <label for="state">State <span class="required">*</span></label>
-                            <input type="text" id="state" name="state" required placeholder="e.g. Arkansas">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">Email Address <span class="required">*</span></label>
-                        <input type="email" id="email" name="email" required>
-                        <small style="color: #666; display: block; margin-top: 5px;">Your email is for internal use only
-                            and will not be published.</small>
-                    </div>
-
-                    <div style="text-align: center; margin-top: 30px;">
-                        <button type="submit" class="btn btn-primary"
-                            style="padding: 14px 40px; font-size: 1.1rem; cursor: pointer;">Submit Tribute</button>
-                        <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">All tributes are reviewed before
-                            publication.</p>
-                    </div>
-                </form>
-                <div id="submitMessage"
-                    style="display:none; text-align: center; margin-top: 20px; font-weight: bold; color: green;"></div>
-            </div>
-        </div>
-    </main>
-
-    </main>
-
-    <style>
-        body {
-            background-color: #f0ebe6;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.12'/%3E%3C/svg%3E");
-            margin: 0;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .required {
-            color: #c00;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-family: inherit;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-
-        input[type="file"] {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            border: 1px dashed #ccc;
-            border-radius: 4px;
-            background: #f9f9f9;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 20px;
-        }
-
-        .half {
-            flex: 1;
-        }
-
-        .checkbox-group {
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
-        }
-
-        .checkbox-group input {
-            margin-top: 5px;
-        }
-
-        .checkbox-group label {
-            font-weight: 400;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .btn-primary {
-            background: #2c3e50;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            transition: background 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: #1a252f;
-        }
-
-        @media (max-width: 600px) {
-            .form-row {
-                flex-direction: column;
-                gap: 0;
-            }
-
-            .container {
-                padding: 0 15px;
-            }
-        }
-    </style>
-
-    <script>
-        document.getElementById('tributeForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerText;
-
-            submitBtn.innerText = 'Submitting...';
-            submitBtn.disabled = true;
-
-            try {
-                // Determine if we are submitting to a real backend or the python script
-                // For this demo, we assume the python server.py handles /api/submit-tribute
-
-                // Convert FormData to JSON object for simple handling in our python script
-                // Note: File uploads won't work perfectly with JSON conversion in this simple script 
-                // but we will simulate the data structure.
-
-                const object = {};
-                formData.forEach((value, key) => {
-                    // Primitive handling of files for JSON
-                    if (value instanceof File) {
-                        object[key] = value.name ? "File: " + value.name : "";
-                    } else {
-                        object[key] = value;
-                    }
-                });
-
-                // Add default status
-                object['publish_status'] = 'pending';
-                // Add marketing and internal flags
-                object['marketing_status'] = 'quiet';
-                object['internal_flags'] = ['tribute_donor', 'future_followup'];
-
-                const response = await fetch('/api/submit-tribute', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(object)
-                });
-
-                if (response.ok) {
-                    document.getElementById('tributeForm').reset();
-                    document.getElementById('submitMessage').innerText = 'Thank you! Your tribute has been submitted for review.';
-                    document.getElementById('submitMessage').style.display = 'block';
-                    document.getElementById('tributeForm').style.display = 'none';
-                } else {
-                    alert('There was an error submitting your tribute. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('There was a network error. Please ensure the server handles requests.');
-            } finally {
-                submitBtn.innerText = originalText;
-                submitBtn.disabled = false;
-            }
-        });
-    </script>
-
-    <footer class="site-footer">
-<div class="container footer-content">
-        <div class="footer-grid">
-            <div class="footer-brand">
-                <div class="footer-logo">
-                    <div class="brand-main">
-                        <span class="brand-top">MELTON</span>
-                        <span class="brand-bottom">MEMORIALS</span>
-                    </div>
-                    <div class="brand-tagline">Love • Honor • Remembrance</div>
-                </div>
-                <p class="footer-description">
-                    Handcrafted pet memorial stones, including granite, cast stone, and natural river rock designs,
-                    crafted for lasting outdoor placement.
-                    Each memorial stone is deeply engraved with care in Alma, Arkansas —
-                    creating a permanent tribute for dogs, cats, and beloved companions.
-                </p>
-                <div class="footer-rating">★★★★★ <span>Thousands of Five-Star Reviews from Pet Memorial Families</span>
-                </div>
-            </div>
-
-            <div class="footer-column">
-                <h3>Shop</h3>
-                <a href="https://meltonmemorials.com/shop/">Shop All Memorials</a>
-            </div>
-
-            <div class="footer-column">
-                <h3>Tributes</h3>
-                <a href="https://meltonmemorials.com/memorials/pet-tributes/">Pet Memorial Tributes</a>
-                <a href="https://meltonmemorials.com/pet-tributes/submit/">Submit a Tribute</a>
-            </div>
-
-            <div class="footer-column">
-                <h3>Contact</h3>
-                <p class="footer-contact-info">
-                    <strong>Melton Memorials — Alma, Arkansas</strong><br><br>
-                    <a href="mailto:rodney@meltonmemorials.com" class="footer-email">rodney@meltonmemorials.com</a><br>
-                    <a href="tel:+14794300716" class="footer-phone">(479) 430-0716</a>
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <div class="footer-bottom">
-        <div class="container">
-            <div class="footer-bottom-content">
-                <p>© 2026 Melton Memorials. All rights reserved.</p>
-                <div class="footer-legal">
-                    <a href="https://meltonmemorials.com/refunds-and-returns/">Returns & Exchanges</a>
-                    <span>•</span>
-                    <a href="https://meltonmemorials.com/terms-and-conditions/">Terms of Service</a>
-                </div>
-                <div class="footer-payments" aria-label="Accepted payment methods">
-                    <img src="/pet-tributes/assets/payment-visa.svg" alt="Visa">
-                    <img src="/pet-tributes/assets/payment-mastercard.svg" alt="Mastercard">
-                    <img src="/pet-tributes/assets/payment-discover.svg" alt="Discover">
-                    <img src="/pet-tributes/assets/payment-amex.svg" alt="American Express">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const mobileToggle = document.querySelector('.mobile-nav-toggle');
-            const mainNav = document.querySelector('.main-nav');
-
-            if (mobileToggle && mainNav) {
-                mobileToggle.addEventListener('click', function () {
-                    mainNav.classList.toggle('mobile-active');
-                    mobileToggle.classList.toggle('active');
-                    document.body.classList.toggle('menu-open');
-                });
-            }
-
-            document.addEventListener('click', function (e) {
-                // Close mobile menu when clicking outside
-                if (mainNav && mainNav.classList.contains('mobile-active') &&
-                    !e.target.closest('.main-nav') && !e.target.closest('.mobile-nav-toggle')) {
-                    mainNav.classList.remove('mobile-active');
-                    mobileToggle.classList.remove('active');
-                    document.body.classList.toggle('menu-open');
-                }
-            });
-        });
-    </script>
-</footer>
 </body>
-
 </html>

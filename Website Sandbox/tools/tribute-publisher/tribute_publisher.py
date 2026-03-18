@@ -27,7 +27,11 @@ SITE_DOMAIN = "https://meltonmemorials.com"
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 TEMPLATES_DIR = os.path.join(PROJECT_ROOT, "templates")
-TRIBUTES_DIR = r"C:\Users\rcmel\dev\Website Sandbox\memorials\pet-tributes"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Website Sandbox/tools/tribute-publisher -> Website Sandbox
+SANDBOX_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
+# Output directory for generated tribute pages
+TRIBUTES_DIR = os.path.join(SANDBOX_DIR, "memorials", "pet-tributes")
 IMAGES_DIR = os.path.join(TRIBUTES_DIR, "images")
 
 ARCHIVE_INDEX = os.path.join(TRIBUTES_DIR, "index.html")
@@ -355,20 +359,8 @@ def sort_entries_newest_first(items: list[dict]) -> list[dict]:
         ),
         reverse=True,
     )
-    entries_sorted = [item for _, item in enumerated]
-
-    featured_entries = [e for e in entries_sorted if e.get("featured") is True]
-    if len(featured_entries) > 1:
-        # Keep only the newest featured tribute.
-        for e in featured_entries[1:]:
-            e["featured"] = False
-
-    featured_entry = next((e for e in entries_sorted if e.get("featured") is True), None)
-    if featured_entry:
-        entries_sorted.remove(featured_entry)
-        entries_sorted.insert(0, featured_entry)
-
-    return entries_sorted
+    # No "featured" pinning: strictly newest-first.
+    return [item for _, item in enumerated]
 
 
 def build_card_html(entry: dict) -> str:
@@ -413,12 +405,12 @@ def build_card_html(entry: dict) -> str:
         or image_filename.endswith("-memorial-stone.png")
         or image_filename.endswith("-memorial-stone.webp")
     )
-    images_base = "/memorials/pet-tributes/images/"
-    card_img_src = (
-        f"{images_base}blank_memorial_loving_memory.png"
-        if (not image_filename or image_filename == "blank_memorial_loving_memory.png")
-        else f"{images_base}{escape_html(image_filename)}"
-    )
+    # Archive cards should point at the image inside each tribute's folder.
+    # (Images are stored at /memorials/pet-tributes/<slug>/<image_filename>)
+    if (not image_filename) or image_filename == "blank_memorial_loving_memory.png":
+        card_img_src = "/memorials/pet-tributes/images/blank_memorial_loving_memory.png"
+    else:
+        card_img_src = f"{card_href}{escape_html(image_filename)}"
     card_absolute_url = f"{SITE_DOMAIN}{card_href}"
     card_image_absolute_url = (
         f"{SITE_DOMAIN}{card_img_src}"
@@ -600,11 +592,9 @@ def build_archive_full_html(cards_html: str, current_page: int, total_pages: int
     # Inject cards + pagination into archive template
     pagination_html = build_pagination(current_page, total_pages)
 
-    recently_remembered_html = build_recently_remembered_cards_html(tribute_entries, tribute_entries)
     content = archive_template.replace("{{CARDS}}", cards_html)
     content = content.replace("{{PAGINATION}}", pagination_html)
     content = content.replace("{{TRIBUTE_COUNT}}", str(len(tribute_entries)))
-    content = content.replace("{{RECENTLY_REMEMBERED_CARDS}}", recently_remembered_html)
 
     # Load header + footer
     header_template = load_template("header.html")
@@ -642,7 +632,6 @@ def write_archive_page(
 ):
     cards_html = "".join(build_card_html(e) for e in page_entries)
     tribute_count = len(all_entries)
-    recently_remembered_html = build_recently_remembered_cards_html(all_entries, page_entries)
     pagination_html = build_pagination_for_prefix(current_page, total_pages, pagination_prefix)
     og_title = title
     og_description = "Browse pet memorial tributes honoring beloved companions."
@@ -671,7 +660,6 @@ def write_archive_page(
     content = archive_template.replace("{{CARDS}}", cards_html)
     content = content.replace("{{PAGINATION}}", pagination_html)
     content = content.replace("{{TRIBUTE_COUNT}}", str(tribute_count))
-    content = content.replace("{{RECENTLY_REMEMBERED_CARDS}}", recently_remembered_html)
 
     header_template = load_template("header.html")
     header_html = header_template.replace("{{HEADER_CLASSES}}", "site-header")
@@ -699,7 +687,7 @@ def write_archive_page(
 def rebuild_archive_pages(entries):
     from math import ceil
 
-    # Featured tributes are pinned first; remaining tributes are newest-first.
+    # Tributes are displayed strictly newest-first (no featured/pinned tribute).
     entries = sort_entries_newest_first(entries)
 
     total_pages = ceil(len(entries) / CARDS_PER_PAGE)
@@ -723,11 +711,8 @@ def rebuild_archive_pages(entries):
         canonical = SITE_DOMAIN + page_url_for_prefix(page_num, "/memorials/pet-tributes/")
         pagination_prefix = "/memorials/pet-tributes/"
 
-        # Skip page 1 - the main archive index.html is manually maintained and never overwritten by the publisher
-        if page_num == 1:
-            continue
-        
-        output_folder = os.path.join(TRIBUTES_DIR, f"page-{page_num}")
+        # Page 1 writes to the root tribute archive folder; page 2+ write to /page-N/
+        output_folder = TRIBUTES_DIR if page_num == 1 else os.path.join(TRIBUTES_DIR, f"page-{page_num}")
 
         write_archive_page(
             page_entries=page_entries,
@@ -1002,15 +987,15 @@ def build_tribute_html(
 
     input_filename = os.path.basename(relative_filename_from_url(og_image_abs))
 
-    # Determine image file/path from provided URL filename. If empty, fall back to shared placeholder.
-    images_base = "/memorials/pet-tributes/images/"
+    # Page HTML should reference images that live alongside the tribute page (same folder),
+    # while OG/share metadata should use absolute URLs.
     if input_filename:
         image_filename = input_filename
-        image_path = f"{images_base}{image_filename}"
-        og_image = f"{SITE_DOMAIN}{image_path}"
+        image_path = escape_html(image_filename)  # local relative path for page HTML
+        og_image = og_image_abs  # keep caller-provided absolute URL for shares/OG
     else:
         image_filename = "blank_memorial_loving_memory.png"
-        image_path = f"{images_base}{image_filename}"
+        image_path = f"/memorials/pet-tributes/images/{image_filename}"
         og_image = f"{SITE_DOMAIN}{image_path}"
 
     second_image_filename = (second_image_filename or "").strip()
@@ -1022,7 +1007,7 @@ def build_tribute_html(
     if second_image_filename:
         image_2_block = (
             '<div class="mm-tribute-image mm-tribute-image-secondary">'
-            f'<img src="{images_base}{escape_html(second_image_filename)}" alt="{escape_html(image_alt)} 2">'
+            f'<img src="{escape_html(second_image_filename)}" alt="{escape_html(image_alt)} 2">'
             "</div>"
         )
     dates_block = f"<p>{escape_html(years_pretty)}</p>" if years_pretty.strip() else ""
@@ -1125,6 +1110,9 @@ def build_tribute_html(
     content = content.replace("{{IMAGE_2_BLOCK}}", image_2_block)
     content = content.replace("{{DATES_BLOCK}}", dates_block)
     content = content.replace("{{SHARED_BLOCK}}", shared_block)
+    # Tribute message is pre-rendered safe HTML (markdown -> HTML) upstream.
+    # Insert as-is so paragraphs/line breaks are preserved.
+    content = content.replace("{{TRIBUTE_MESSAGE}}", tribute_message_html or "<p></p>")
     content = content.replace("{{SHARE_FACEBOOK_URL}}", share_facebook_url)
     content = content.replace("{{SHARE_PINTEREST_URL}}", share_pinterest_url)
     content = content.replace("{{SHARE_EMAIL_URL}}", share_email_url)
@@ -1193,6 +1181,10 @@ def rebuild_single_tribute_page(entry: dict, tribute_message_override: str = "")
             )
             if msg_match:
                 tribute_message_html = (msg_match.group(1) or "").strip()
+                # If a previously-generated page accidentally contained the raw template token,
+                # do not preserve it—force regeneration from entry data instead.
+                if "{{TRIBUTE_MESSAGE}}" in tribute_message_html:
+                    tribute_message_html = ""
         except Exception:
             tribute_message_html = ""
 

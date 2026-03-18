@@ -101,7 +101,8 @@
     "image2_filename": "brownie-dog-mixed-breed-2.webp",
     "featured": false,
     "email_sent": true,
-    "full_message": "Our baby boy was a stray when we first met him.\n\n**He chose our family** and couldn't have been a more perfect fit.\n\nHe loved car rides and people and loved getting pup cups.\n\n**He was the bestest boy** and we will greatly miss him."
+    "full_message": "Our baby boy was a stray when we first met him.\n\n**He chose our family** and couldn't have been a more perfect fit.\n\nHe loved car rides and people and loved getting pup cups.\n\n**He was the bestest boy** and we will greatly miss him.",
+    "certificate_text": "Our baby boy was a stray when we first met him. He chose our family and couldn't have been a more perfect fit. He loved car rides and people and loved getting pup cups. He was the bestest boy and we will greatly miss him."
   },
   {
     "slug": "missy-dog-rescue-dog",
@@ -155,53 +156,21 @@
     "full_message": "She had **a heart that loved everything and everyone**.\n\n**I have never been more loved than by this dog.** 💔"
   },
   {
-    "slug": "bo-cat",
-    "pet_name": "bo",
-    "breed": "",
-    "pet_type": "cat",
-    "years_pretty": "",
-    "excerpt": "cat",
-    "full_message": "cat",
-    "first_name": "",
-    "state": "",
-    "published_iso": "2026-03-11T20:02:39",
-    "image_filename": "bo-cat.webp",
-    "image2_filename": "",
-    "featured": false,
-    "email_sent": false,
-    "email": ""
-  },
-  {
-    "slug": "trixie-frog",
-    "pet_name": "Trixie",
-    "breed": "",
-    "pet_type": "Frog",
-    "years_pretty": "2012 - 2020",
-    "excerpt": "Goodbye to trixie GooGoodbye to trixie Goodbye to trixie Goodbye to trixie Goodbye to trixie Goodbye to trixie Goodbye to trixie Goodbye to trixie Goodbye to trixie dbye to trixie Goodbye to trixie",
-    "full_message": "Goodbye to trixie GooGoodbye to trixie Goodbye to trixie Goodbye to trixie Goodbye to trixie Goodbye to trixie Goodbye to trixie Goodbye to trixie Goodbye to trixie dbye to trixie Goodbye to trixie",
-    "first_name": "",
-    "state": "",
-    "published_iso": "2026-03-13T20:01:38",
-    "image_filename": "trixie-frog.webp",
-    "image2_filename": "",
-    "featured": false,
-    "email_sent": false,
-    "email": ""
-  },
-  {
-    "slug": "bruno-dog",
-    "pet_name": "Bruno",
-    "breed": "",
+    "slug": "gigi-dog-mixed-breed-black-lab-and-mastiff",
+    "pet_name": "Gigi",
+    "breed": "Mixed breed, black lab and mastiff",
     "pet_type": "Dog",
-    "years_pretty": "2012 - 2026",
-    "excerpt": "Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye...",
-    "full_message": "Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast Goodbye Bruno, We had a blast",
-    "first_name": "",
-    "state": "",
-    "published_iso": "2026-03-13T20:23:59",
-    "image_filename": "bruno-dog.webp",
+    "years_pretty": "2023 - 2026",
+    "excerpt": "She was 8 1/2 years old when I rescued her. She had been at the shelter for 8 months because nobody wanted a senior dog. I took her and gave her, her best life. She slept on my couch with a pillow. She collapsed one day...",
+    "full_message": "She was 8 1/2 years old when I rescued her. She had been at the shelter for 8 months because nobody wanted a senior dog. I took her and gave her, her best life. She slept on my couch with a pillow. She collapsed one day and never moved again. She was 11. I gave her a spoiled life, homemade dog food and all. The neighbors kids and mailman gave her treats constantly",
+    "first_name": "Deborah",
+    "state": "MI",
+    "published_iso": "2026-03-16T23:29:43",
+    "image_filename": "gigi-dog-mixed-breed-black-lab-and-mastiff.webp",
     "image2_filename": "",
     "featured": false,
-    "email_sent": false
+    "email_sent": true,
+    "email": "debunny56@gmail.com",
+    "certificate_text": "I took her and gave her, her best life. I gave a spoiled life, homemade dog food and all. The neighbors kids and mailman gave her treats constantly."
   }
 ]
