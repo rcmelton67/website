@@ -1165,30 +1165,38 @@ def rebuild_single_tribute_page(entry: dict, tribute_message_override: str = "")
     safe_mkdir(tribute_folder)
     index_path = os.path.join(tribute_folder, "index.html")
 
-    # Preserve existing tribute body text when editing metadata/images unless explicit override provided.
+    # Prefer explicit override text when provided (e.g. from editor UI).
     tribute_message_html = ""
     override_text = (tribute_message_override or "").strip()
     if override_text:
         tribute_message_html = parse_safe_markdown(override_text)
-    elif os.path.exists(index_path):
-        try:
-            with open(index_path, "r", encoding="utf-8") as f:
-                existing_html = f.read()
-            msg_match = re.search(
-                r'<div class="mm-tribute-message(?:\s+mm-tribute-message-centered)?"(?:\s+style="[^"]*")?\s*>\s*(.*?)\s*</div>',
-                existing_html,
-                flags=re.S,
-            )
-            if msg_match:
-                tribute_message_html = (msg_match.group(1) or "").strip()
-                # If a previously-generated page accidentally contained the raw template token,
-                # do not preserve it—force regeneration from entry data instead.
-                if "{{TRIBUTE_MESSAGE}}" in tribute_message_html:
+    else:
+        # Next, prefer the structured full_message field from JSON if available.
+        full_message_markdown = (entry.get("full_message") or "").strip()
+        if full_message_markdown:
+            tribute_message_html = parse_safe_markdown(full_message_markdown)
+        else:
+            # Backwards-compatible: attempt to preserve existing HTML body from the page.
+            if os.path.exists(index_path):
+                try:
+                    with open(index_path, "r", encoding="utf-8") as f:
+                        existing_html = f.read()
+                    msg_match = re.search(
+                        r'<div class="mm-tribute-message(?:\s+mm-tribute-message-centered)?"(?:\s+style="[^"]*")?\s*>\s*(.*?)\s*</div>',
+                        existing_html,
+                        flags=re.S,
+                    )
+                    if msg_match:
+                        tribute_message_html = (msg_match.group(1) or "").strip()
+                        # If a previously-generated page accidentally contained the raw template token,
+                        # do not preserve it—force regeneration from entry data instead.
+                        if "{{TRIBUTE_MESSAGE}}" in tribute_message_html:
+                            tribute_message_html = ""
+                except Exception:
                     tribute_message_html = ""
-        except Exception:
-            tribute_message_html = ""
 
     if not tribute_message_html:
+        # Final fallback: use the short excerpt, wrapped as a single paragraph.
         fallback_excerpt = (entry.get("excerpt") or "").strip()
         tribute_message_html = f"<p>{escape_html(fallback_excerpt)}</p>" if fallback_excerpt else "<p></p>"
 
@@ -1787,6 +1795,8 @@ class TributePublisherApp:
             entry["email"] = widgets["email"].get().strip()
             entry["email_sent"] = widgets["email_sent_var"].get() is True
             entry["excerpt"] = summarize_excerpt(strip_markdown_for_excerpt(edited_tribute_message))
+            # Persist the full tribute body (markdown) so single pages can always render the entire message.
+            entry["full_message"] = edited_tribute_message
 
             image1_filename = resolve_image_field("image_filename", f"{slug}.webp", "Image 1")
             if image1_filename is None:
@@ -2084,7 +2094,7 @@ Alma, Arkansas
         page_url = f"{SITE_DOMAIN}{tribute_web_path}"
         excerpt = summarize_excerpt(strip_markdown_for_excerpt(tribute_msg))
 
-        # Convert limited markdown into safe HTML.
+        # Convert limited markdown into safe HTML for the page body.
         tribute_message_html = parse_safe_markdown(tribute_msg)
 
         tribute_html = build_tribute_html(
@@ -2137,6 +2147,8 @@ Alma, Arkansas
             "pet_type": pet_type,
             "years_pretty": years_pretty,
             "excerpt": excerpt,
+            # Store the full markdown body so single tribute pages can always be rebuilt accurately.
+            "full_message": tribute_msg,
             "first_name": first_name,
             "state": state,
             "email": email,

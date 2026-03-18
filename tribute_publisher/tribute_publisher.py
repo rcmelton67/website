@@ -1330,6 +1330,9 @@ def build_tribute_html(
     content = content.replace("{{IMAGE_2_BLOCK}}", image_2_block)
     content = content.replace("{{DATES_BLOCK}}", dates_block)
     content = content.replace("{{SHARED_BLOCK}}", shared_block)
+    # Tribute message is pre-rendered safe HTML (markdown -> HTML) upstream.
+    # Insert as-is so paragraphs/line breaks are preserved.
+    content = content.replace("{{TRIBUTE_MESSAGE}}", tribute_message_html or "<p></p>")
     content = content.replace("{{SHARE_FACEBOOK_URL}}", share_facebook_url)
     content = content.replace("{{SHARE_PINTEREST_URL}}", share_pinterest_url)
     content = content.replace("{{SHARE_EMAIL_URL}}", share_email_url)
