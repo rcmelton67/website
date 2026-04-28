@@ -7,12 +7,22 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://meltonmemorials.com/memorials/pet-tributes/dog/</loc>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/page-2/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://meltonmemorials.com/memorials/pet-tributes/cat/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/dog/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/dog/page-2/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -63,6 +73,56 @@
   </url>
   <url>
     <loc>https://meltonmemorials.com/memorials/pet-tributes/gigi-dog-mixed-breed-black-lab-and-mastiff/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/loki-dog-silver-lab/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/enzo-dog-boxador/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/trixi-doodle-dog-miniature-pinscher-chihuahua/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/sophie-dog-old-english-bulldog/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/riley-dog-german-shepherd/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/hootie-cat-tuxedo/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/goldie-dog/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/wilton-dog-dachshund/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/rascal-dog-poodle-mix/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/phoebe-cat-tabby/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

@@ -1,9 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Submit Your Pet's Tribute</title>
+ 
+
   <style>
     .mm-tribute-submit {
       width: 100%;
@@ -420,8 +416,6 @@
       }
     }
   </style>
-</head>
-<body>
 
 <div class="mm-tribute-submit">
 
@@ -474,79 +468,7 @@ Your tribute message will appear here as you type. Share a favorite memory, what
 
         <div class="mm-hero-form" id="mm-tribute-form">
           <div class="form-card" style="background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #eee; margin-top: 24px;">
-            <form id="tributeForm" enctype="multipart/form-data">
-              <div class="form-group">
-                <label for="petName">Pet Name <span class="required">*</span></label>
-                <input type="text" id="petName" name="petName" required>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group half">
-                  <label for="petType">Pet Type <span class="required">*</span></label>
-                  <select id="petType" name="petType" required>
-                    <option value="" disabled selected>Select...</option>
-                    <option value="Dog">Dog</option>
-                    <option value="Cat">Cat</option>
-                    <option value="Horse">Horse</option>
-                    <option value="Bird">Bird</option>
-                    <option value="Reptile">Reptile</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-                <div class="form-group half">
-                  <label for="breed">Breed</label>
-                  <input type="text" id="breed" name="breed" placeholder="e.g. Labrador">
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="yearsTogether">Years Together</label>
-                <input type="text" id="yearsTogether" name="yearsTogether" placeholder="e.g. 2010 - 2024">
-              </div>
-
-              <div class="form-group">
-                <label for="tributeStory">Tribute Message <span class="required">*</span></label>
-                <textarea id="tributeStory" name="tributeStory" rows="6" required placeholder="Share your favorite memory..."></textarea>
-              </div>
-
-              <div class="form-group">
-                <label for="petPhoto">Upload Pet Photo (Optional)</label>
-                <input type="file" id="petPhoto" name="petPhoto" accept="image/*">
-              </div>
-
-              <div class="form-group">
-                <label for="memorialImg">Add Memorial Image (Optional)</label>
-                <input type="file" id="memorialImg" name="memorialImg" accept="image/*">
-                <small style="color: #666; display: block; margin-top: 5px;">Haven't received your memorial yet? No worries! You can always come back and add this image later once it arrives.</small>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group half">
-                  <label for="firstName">First Name <span class="required">*</span></label>
-                  <input type="text" id="firstName" name="firstName" required>
-                </div>
-                <div class="form-group half">
-                  <label for="state">State <span class="required">*</span></label>
-                  <input type="text" id="state" name="state" required placeholder="e.g. Arkansas">
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="email">Email Address <span class="required">*</span></label>
-                <input type="email" id="email" name="email" required>
-                <small style="color: #666; display: block; margin-top: 5px;">Your email is for internal use only and will not be published.</small>
-              </div>
-
-              <div style="text-align: center; margin-top: 30px;">
-                <a class="btn btn-primary tribute-submit-btn"
-                   href="https://meltonmemorials.com/pet-tributes/submit/"
-                   target="_blank" rel="noopener"
-                   style="padding: 14px 40px; font-size: 1.1rem;">
-                  Submit Your Pet's Tribute
-                </a>
-                <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">All tributes are reviewed before publication.</p>
-              </div>
-            </form>
+            
             <div id="submitMessage" style="display:none; text-align: center; margin-top: 20px; font-weight: bold; color: green;"></div>
           </div>
         </div>
@@ -556,8 +478,3 @@ Your tribute message will appear here as you type. Share a favorite memory, what
   </section>
 
 </div>
-
-<script src="tribute-preview.js"></script>
-
-</body>
-</html>

@@ -11,7 +11,7 @@
             </p>
 
             <div class="mm-submit-top">
-                <a href="https://meltonmemorials.com/pet-tributes/submit/" class="mm-submit-btn">
+                <a href="https://meltonmemorials.com/submit-tribute/" class="mm-submit-btn">
                     Share a Memorial Tribute →
                 </a>
             </div>
@@ -63,7 +63,7 @@
         </section>
 
         <section class="mm-submit-block">
-            <a href="https://meltonmemorials.com/pet-tributes/submit/" class="mm-submit-btn">
+            <a href="https://meltonmemorials.com/submit-tribute/" class="mm-submit-btn">
                 Submit a Tribute →
             </a>
         </section>
