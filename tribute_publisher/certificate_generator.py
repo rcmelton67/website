@@ -8,6 +8,7 @@ Overlays pet photo, name, life dates, and tribute message.
 import os
 import re
 import time
+import math
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 # Template caching for performance
@@ -82,6 +83,114 @@ def compose_rounded_photo(
         final.putalpha(mask)
         
         return final
+
+
+def tribute_has_visual_framing_metadata(tribute: dict | None) -> bool:
+    """
+    True when tribute uses transform-style framing (same notion as tribute pages).
+    Supports image_offset_* (canonical), legacy image_position_* keys, or numeric image_zoom ≠ 1.
+    """
+    if not tribute:
+        return False
+    if "image_offset_y" in tribute or "image_offset_x" in tribute:
+        return True
+    if "image_position_y" in tribute or "image_position_x" in tribute:
+        return True
+    z = tribute.get("image_zoom")
+    if isinstance(z, (int, float)) and abs(float(z) - 1.0) > 1e-6:
+        return True
+    return False
+
+
+def parse_tribute_framing_for_certificate(tribute: dict | None) -> tuple[float, float, float]:
+    """
+    Returns (offset_x_pct, offset_y_pct, zoom) matching publisher / CSS (--pet-offset-*, --pet-zoom).
+    """
+    if not tribute:
+        return 0.0, 0.0, 1.0
+    ox = float(tribute.get("image_offset_x", tribute.get("image_position_x", 0)) or 0)
+    oy = float(tribute.get("image_offset_y", tribute.get("image_position_y", 0)) or 0)
+    zraw = tribute.get("image_zoom", 1)
+    try:
+        z = float(zraw)
+    except (TypeError, ValueError):
+        z = 1.0
+    z = max(0.5, min(2.0, z))
+    ox = max(-80.0, min(80.0, ox))
+    oy = max(-80.0, min(80.0, oy))
+    return ox, oy, z
+
+
+def compose_rounded_photo_framed(
+    photo_path: str,
+    output_size: int = 160,
+    corner_radius: int = 18,
+    offset_x_pct: float = 0.0,
+    offset_y_pct: float = 0.0,
+    zoom: float = 1.0,
+) -> Image.Image:
+    """
+    Same rounded output as compose_rounded_photo, but crop matches publisher hero framing:
+    object-fit: cover semantics (no letterboxing), then pan via offset % of scaled image, then zoom.
+
+    Always fills the output square: scale never drops below min cover, and paste position is clamped
+    so the bitmap fully covers [0,cw]×[0,ch] before masking (no visible fill bands).
+    """
+    if not os.path.exists(photo_path):
+        raise FileNotFoundError(f"Photo not found: {photo_path}")
+
+    cw = ch = output_size
+    z = max(0.5, min(2.0, float(zoom)))
+    ox = max(-80.0, min(80.0, float(offset_x_pct)))
+    oy = max(-80.0, min(80.0, float(offset_y_pct)))
+
+    with Image.open(photo_path) as img0:
+        img = img0.convert("RGB")
+    iw, ih = img.size
+    if iw < 1 or ih < 1:
+        return compose_rounded_photo(photo_path, output_size, corner_radius)
+
+    # Minimum scale so bitmap always covers the frame (same as CSS object-fit: cover).
+    base_cover = max(cw / float(iw), ch / float(ih))
+    cover = max(base_cover * z, base_cover)
+
+    sw = max(cw, int(math.ceil(iw * cover - 1e-9)))
+    sh = max(ch, int(math.ceil(ih * cover - 1e-9)))
+    pil_s = img.resize((sw, sh), Image.LANCZOS)
+
+    px = (ox / 100.0) * sw
+    py = (oy / 100.0) * sh
+    x0 = (cw - sw) / 2.0 + px
+    y0 = (ch - sh) / 2.0 + py
+    # Clamp so the scaled image always covers the full viewport (no top/side bands).
+    x0 = max(float(cw - sw), min(0.0, x0))
+    y0 = max(float(ch - sh), min(0.0, y0))
+
+    ix = int(math.floor(x0 + 1e-6))
+    iy = int(math.floor(y0 + 1e-6))
+    if ix + sw < cw:
+        ix = cw - sw
+    if iy + sh < ch:
+        iy = ch - sh
+    if ix > 0:
+        ix = 0
+    if iy > 0:
+        iy = 0
+
+    # Unreachable gaps should match certificate paper, not a dark band.
+    fill_rgb = (252, 249, 245)
+    square = Image.new("RGB", (cw, ch), fill_rgb)
+    square.paste(pil_s, (ix, iy))
+
+    mask = Image.new("L", (cw, ch), 0)
+    draw_m = ImageDraw.Draw(mask)
+    draw_m.rounded_rectangle([(0, 0), (cw, ch)], corner_radius, fill=255)
+    mask = mask.filter(ImageFilter.GaussianBlur(radius=0.5))
+
+    final = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
+    final.paste(square, (0, 0))
+    final.putalpha(mask)
+    return final
 
 
 def extract_message_from_tribute(text: str) -> str:
@@ -676,81 +785,65 @@ def generate_certificate(
         print("================================================\n")
     
     # ==========================================
-    # Draw Photo (composed with rounded corners)
+    # Draw Photo (composed with rounded corners; uses tribute framing when present)
     # ==========================================
     if pet_photo_path and os.path.exists(pet_photo_path) and os.path.isfile(pet_photo_path):
         try:
             t1 = time.time()
-            # Load and process photo
-            with Image.open(pet_photo_path) as photo:
-                if photo.mode != "RGB":
-                    photo = photo.convert("RGB")
-                
-                width, height = photo.size
-                
-                # Center crop to square
-                if width > height:
-                    left = (width - height) // 2
-                    photo = photo.crop((left, 0, left + height, height))
-                elif height > width:
-                    top = (height - width) // 2
-                    photo = photo.crop((0, top, width, top + width))
-                
-                # Resize to final size
-                photo = photo.resize((PHOTO_SIZE, PHOTO_SIZE), Image.LANCZOS)
-                
-                # Apply subtle edge blur to photo for softer appearance (reduced for performance)
-                edge_blur_radius = 1.0  # Reduced from 1.5 to 1.0 for faster processing
-                photo = photo.filter(ImageFilter.GaussianBlur(radius=edge_blur_radius))
-                
-                # Create rounded-rectangle mask
-                mask = Image.new("L", (PHOTO_SIZE, PHOTO_SIZE), 0)
-                draw_mask = ImageDraw.Draw(mask)
-                draw_mask.rounded_rectangle(
-                    [(0, 0), (PHOTO_SIZE, PHOTO_SIZE)],
-                    radius=PHOTO_CORNER_RADIUS,
-                    fill=255
+            tribute_dict = tribute if tribute else {}
+            if tribute_has_visual_framing_metadata(tribute_dict):
+                ox, oy, z = parse_tribute_framing_for_certificate(tribute_dict)
+                photo_rgba = compose_rounded_photo_framed(
+                    pet_photo_path,
+                    PHOTO_SIZE,
+                    PHOTO_CORNER_RADIUS,
+                    ox,
+                    oy,
+                    z,
                 )
-                
-                # Apply slight blur to mask edges for smoother transition (reduced for performance)
-                mask = mask.filter(ImageFilter.GaussianBlur(radius=0.5))  # Reduced from 0.8 to 0.5
-                
-                # Optional: Add soft drop shadow (optimized for performance)
-                shadow_offset = 12  # Increased from 8 for more depth
-                shadow_blur = 8  # Reduced from 12 to 8 for better performance (33% faster blur)
-                shadow_opacity = 128  # 50% of 255 (increased from 40% for more visible shadow)
-                
-                # Create shadow layer (optimized size calculation)
-                # Pre-calculate exact bounds to minimize shadow mask size
-                shadow_padding = shadow_blur + shadow_offset
-                shadow_size = PHOTO_SIZE + shadow_padding * 2
-                shadow_mask = Image.new("L", (shadow_size, shadow_size), 0)
-                draw_shadow = ImageDraw.Draw(shadow_mask)
-                # Draw shadow shape at exact position within mask
-                draw_shadow.rounded_rectangle(
-                    [(shadow_padding, shadow_padding), 
-                     (shadow_padding + PHOTO_SIZE, shadow_padding + PHOTO_SIZE)],
-                    radius=PHOTO_CORNER_RADIUS,
-                    fill=255
+            else:
+                photo_rgba = compose_rounded_photo(
+                    pet_photo_path,
+                    PHOTO_SIZE,
+                    PHOTO_CORNER_RADIUS,
                 )
-                
-                # Apply blur to shadow mask (reduced radius for performance)
-                t_blur = time.time()
-                shadow_mask = shadow_mask.filter(ImageFilter.GaussianBlur(radius=shadow_blur))
-                perf_log.append(f"Shadow blur: {time.time() - t_blur:.2f}s")
-                
-                # Create shadow image with alpha (reduce opacity)
-                shadow = Image.new("RGBA", (shadow_size, shadow_size), (0, 0, 0, 0))
-                # Apply opacity to mask
-                shadow_alpha = shadow_mask.point(lambda p: int(p * shadow_opacity / 255))
-                shadow.paste((0, 0, 0), (0, 0), shadow_alpha)
-                
-                # Paste shadow first (offset by shadow_padding for optimized positioning)
-                certificate_image.paste(shadow, (int(PHOTO_X - shadow_padding), int(PHOTO_Y - shadow_padding)), shadow)
-                
-                # Paste photo with rounded mask
-                certificate_image.paste(photo, (int(PHOTO_X), int(PHOTO_Y)), mask)
-                perf_log.append(f"Photo processing: {time.time() - t1:.2f}s")
+
+            edge_blur_radius = 1.0
+            r, g, b, a = photo_rgba.split()
+            rgb_blurred = Image.merge("RGB", (r, g, b)).filter(ImageFilter.GaussianBlur(radius=edge_blur_radius))
+            photo_rgba = Image.merge("RGBA", (*rgb_blurred.split(), a))
+
+            paste_mask = photo_rgba.split()[3]
+            photo_rgb = Image.merge("RGB", photo_rgba.split()[:3])
+
+            shadow_offset = 12
+            shadow_blur = 8
+            shadow_opacity = 128
+
+            shadow_padding = shadow_blur + shadow_offset
+            shadow_size = PHOTO_SIZE + shadow_padding * 2
+            shadow_mask = Image.new("L", (shadow_size, shadow_size), 0)
+            draw_shadow = ImageDraw.Draw(shadow_mask)
+            draw_shadow.rounded_rectangle(
+                [
+                    (shadow_padding, shadow_padding),
+                    (shadow_padding + PHOTO_SIZE, shadow_padding + PHOTO_SIZE),
+                ],
+                radius=PHOTO_CORNER_RADIUS,
+                fill=255,
+            )
+
+            t_blur = time.time()
+            shadow_mask = shadow_mask.filter(ImageFilter.GaussianBlur(radius=shadow_blur))
+            perf_log.append(f"Shadow blur: {time.time() - t_blur:.2f}s")
+
+            shadow = Image.new("RGBA", (shadow_size, shadow_size), (0, 0, 0, 0))
+            shadow_alpha = shadow_mask.point(lambda p: int(p * shadow_opacity / 255))
+            shadow.paste((0, 0, 0), (0, 0), shadow_alpha)
+
+            certificate_image.paste(shadow, (int(PHOTO_X - shadow_padding), int(PHOTO_Y - shadow_padding)), shadow)
+            certificate_image.paste(photo_rgb, (int(PHOTO_X), int(PHOTO_Y)), paste_mask)
+            perf_log.append(f"Photo processing: {time.time() - t1:.2f}s")
         except Exception as e:
             print(f"Warning: Could not add photo to certificate: {e}")
             import traceback

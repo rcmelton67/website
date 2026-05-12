@@ -649,6 +649,52 @@ body {
   margin: 0 auto;
 }
 
+/* Hero pet photo: optional position + zoom (--pet-image-position / --pet-image-zoom from data.json) */
+.mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-photo-custom .mm-image-wrapper,
+.mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-photo-custom .mm-image-wrapper.pet-image,
+.mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-position-custom .mm-image-wrapper,
+.mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-framing-visual.mm-pet-photo-custom .mm-image-wrapper,
+.mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-framing-visual.mm-pet-photo-custom .mm-image-wrapper.pet-image {
+  max-width: 420px;
+  width: 92%;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 8px;
+  aspect-ratio: 4 / 3;
+}
+
+.mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-photo-custom .pet-image img,
+.mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-photo-custom .mm-image-wrapper img,
+.mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-position-custom .mm-image-wrapper img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  object-fit: cover !important;
+  object-position: var(--pet-image-position, center center);
+  transform: scale(var(--pet-image-zoom, 1));
+  transform-origin: center center;
+  margin: 0 !important;
+  display: block;
+}
+
+/* Visual framing editor (data.json: image_position_y / image_position_x / numeric image_zoom) */
+.mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-framing-visual.mm-pet-photo-custom .mm-image-wrapper img,
+.mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-framing-visual.mm-pet-photo-custom .pet-image img {
+  object-position: center center;
+  transform: translate(var(--pet-offset-x, 0%), var(--pet-offset-y, 0%)) scale(var(--pet-zoom, 1));
+  transform-origin: center center;
+}
+
+@media (max-width: 768px) {
+  .mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-photo-custom .mm-image-wrapper,
+  .mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-photo-custom .mm-image-wrapper.pet-image,
+  .mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-position-custom .mm-image-wrapper,
+  .mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-framing-visual.mm-pet-photo-custom .mm-image-wrapper,
+  .mm-tribute-system .mm-tribute-image.mm-tribute-pet-primary.mm-pet-framing-visual.mm-pet-photo-custom .mm-image-wrapper.pet-image {
+    max-width: 300px;
+  }
+}
+
 .mm-tribute-card:hover img,
 .mm-tribute-card img {
   transform: none !important;

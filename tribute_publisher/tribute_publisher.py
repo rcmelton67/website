@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import json
+import math
 import html
 import random
 import urllib.parse
@@ -14,7 +15,7 @@ from datetime import datetime
 from email.message import EmailMessage
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
-from PIL import Image
+from PIL import Image, ImageTk
 
 # Certificate generator
 try:
@@ -312,6 +313,170 @@ def verify_safe_output_path(file_path: str) -> bool:
         )
     
     return True
+
+
+_DEFAULT_PET_IMAGE_POSITION = "center center"
+_DEFAULT_PET_IMAGE_ZOOM = "1.0"
+
+
+def sanitize_image_position(raw: str) -> str | None:
+    """
+    Return a safe CSS object-position value for the hero pet photo, or None for default
+    (no custom crop — existing contain layout is preserved).
+
+    Blank, invalid, or exactly 'center center' -> None.
+    """
+    s = (raw or "").strip()
+    if not s:
+        return None
+    s = re.sub(r"\s+", " ", s)
+    if s.lower() == _DEFAULT_PET_IMAGE_POSITION:
+        return None
+    if len(s) > 80:
+        return None
+    if not re.fullmatch(r"[a-zA-Z0-9.%\s-]+", s):
+        return None
+    tokens = s.split()
+    if len(tokens) < 1 or len(tokens) > 2:
+        return None
+    keywords = {"left", "right", "center", "top", "bottom"}
+    for t in tokens:
+        tl = t.lower()
+        if tl in keywords:
+            continue
+        if re.fullmatch(r"\d{1,3}(\.\d+)?%", t):
+            continue
+        if re.fullmatch(r"\d{1,4}(\.\d+)?px", t):
+            continue
+        return None
+    normalized: list[str] = []
+    for t in tokens:
+        tl = t.lower()
+        if tl in keywords:
+            normalized.append(tl)
+        else:
+            normalized.append(t)
+    return " ".join(normalized)
+
+
+def sanitize_image_zoom(raw: str) -> str | None:
+    """
+    Return a safe unitless number for CSS scale(), or None for default 1.
+    Accepts 0.5–2.0; values equivalent to 1.0 are treated as default.
+    """
+    s = (raw or "").strip().replace(",", ".")
+    if not s:
+        return None
+    if not re.fullmatch(r"\d+(\.\d+)?", s):
+        return None
+    z = float(s)
+    if z < 0.5 or z > 2.0:
+        return None
+    if abs(z - 1.0) < 1e-4:
+        return None
+    out = f"{z:.6f}".rstrip("0").rstrip(".")
+    return out or None
+
+
+def pet_photo_custom_markup(image_position: str, image_zoom: str) -> tuple[str, str, str]:
+    """
+    Returns (outer_extra_class, img_style_attr, wrapper_extra_class).
+    All empty when both fields are defaults (no manual crop/zoom).
+    """
+    pos_opt = sanitize_image_position(image_position)
+    zoom_opt = sanitize_image_zoom(image_zoom)
+    if pos_opt is None and zoom_opt is None:
+        return "", "", ""
+    pos_css = pos_opt or _DEFAULT_PET_IMAGE_POSITION
+    zoom_css = zoom_opt or "1"
+    cls = " mm-pet-photo-custom"
+    wrap = " pet-image"
+    style = (
+        f' style="--pet-image-position: {escape_html(pos_css)}; --pet-image-zoom: {escape_html(zoom_css)};"'
+    )
+    return cls, style, wrap
+
+
+def entry_uses_visual_pet_framing(entry: dict) -> bool:
+    """
+    Transform-based hero framing (data.json: image_offset_* / image_zoom numeric, or legacy image_position_*).
+    Legacy tributes use string image_position and/or string image_zoom only — unchanged.
+    """
+    if "image_offset_y" in entry:
+        return True
+    if "image_offset_x" in entry:
+        return True
+    if "image_position_y" in entry:
+        return True
+    if "image_position_x" in entry:
+        return True
+    z = entry.get("image_zoom")
+    if isinstance(z, (int, float)) and abs(float(z) - 1.0) > 1e-6:
+        return True
+    return False
+
+
+def pet_photo_visual_markup(y_pct: float, x_pct: float, zoom: float) -> tuple[str, str, str]:
+    """
+    Hero pet photo via CSS transform (translate + scale). Percent offsets match CSS % in translate().
+    """
+    z = float(zoom)
+    z = max(0.5, min(2.0, z))
+    y_pct = max(-80.0, min(80.0, float(y_pct)))
+    x_pct = max(-80.0, min(80.0, float(x_pct)))
+    zs = f"{z:.6f}".rstrip("0").rstrip(".") or "1"
+    ys = f"{y_pct:g}%"
+    xs = f"{x_pct:g}%"
+    cls = " mm-pet-framing-visual mm-pet-photo-custom"
+    wrap = " pet-image"
+    style = (
+        f' style="--pet-offset-x: {escape_html(xs)}; --pet-offset-y: {escape_html(ys)}; '
+        f'--pet-zoom: {escape_html(zs)};"'
+    )
+    return cls, style, wrap
+
+
+def resolve_pet_photo_markup(entry: dict) -> tuple[str, str, str]:
+    """Pick visual (transform) vs legacy (object-position + scale) markup from tribute entry fields."""
+    if entry_uses_visual_pet_framing(entry):
+        y = float(entry.get("image_offset_y", entry.get("image_position_y") or 0) or 0)
+        x = float(entry.get("image_offset_x", entry.get("image_position_x") or 0) or 0)
+        z = float(entry.get("image_zoom") or 1)
+        y = max(-80.0, min(80.0, y))
+        x = max(-80.0, min(80.0, x))
+        z = max(0.5, min(2.0, z))
+        return pet_photo_visual_markup(y, x, z)
+    return pet_photo_custom_markup(
+        str(entry.get("image_position") or ""),
+        str(entry.get("image_zoom") or "") if not isinstance(entry.get("image_zoom"), (int, float)) else "",
+    )
+
+
+def merge_visual_framing_into_entry(entry: dict, fragment: dict) -> None:
+    """Apply visual framing dict to entry; strip legacy string keys when using visual. fragment empty = defaults."""
+    entry.pop("image_position", None)
+    if isinstance(entry.get("image_zoom"), str):
+        entry.pop("image_zoom", None)
+    for k in ("image_offset_y", "image_offset_x", "image_position_y", "image_position_x"):
+        entry.pop(k, None)
+    if isinstance(entry.get("image_zoom"), (int, float)):
+        entry.pop("image_zoom", None)
+    if not fragment:
+        return
+    for k, v in fragment.items():
+        entry[k] = v
+
+
+def collect_visual_framing_fragment(y: float, x: float, z: float) -> dict:
+    """Build data.json fragment for transform-based framing (defaults → empty dict)."""
+    frag: dict = {}
+    if abs(float(x)) > 1e-6:
+        frag["image_offset_x"] = round(float(x), 2)
+    if abs(float(y)) > 1e-6:
+        frag["image_offset_y"] = round(float(y), 2)
+    if abs(float(z) - 1.0) > 1e-6:
+        frag["image_zoom"] = round(float(z), 4)
+    return frag
 
 
 def get_entry_folder(entry: dict) -> str:
@@ -1090,6 +1255,9 @@ def build_tribute_html(
     tribute_message_html: str,
     og_image_width: int = None,
     og_image_height: int = None,
+    image_position: str = "",
+    image_zoom: str = "",
+    framing_source: dict | None = None,
 ) -> str:
 
     # ----- Title / subtitle logic -----
@@ -1312,15 +1480,24 @@ def build_tribute_html(
     }
     breadcrumb_json = json.dumps(breadcrumb_data, ensure_ascii=False)
 
+    fe: dict = framing_source if framing_source is not None else {
+        "image_position": image_position,
+        "image_zoom": image_zoom,
+    }
+    photo_cls, pet_image_style, wrapper_extra = resolve_pet_photo_markup(fe)
+
     # ----- Load tribute content from Website Sandbox template (body-only) -----
     content = load_sandbox_template(TEMPLATE_PATH)
     content = content.replace("{{TRIBUTE_H1}}", escape_html(tribute_h1))
     content = content.replace("{{TRIBUTE_INTRO}}", escape_html(tribute_intro))
     content = content.replace("{{PET_NAME}}", escape_html(pet_name))
+    content = content.replace("{{PET_PHOTO_CUSTOM_CLASS}}", photo_cls)
+    content = content.replace("{{PET_IMAGE_WRAPPER_EXTRA}}", wrapper_extra)
+    content = content.replace("{{PET_IMAGE_STYLE}}", pet_image_style)
     # Add performance attributes to image path replacement
     # Template should have: <img src="{{IMAGE_PATH}}" alt="{{IMAGE_ALT}}">
     # We'll replace with full img tag including performance attributes
-    img_tag = f'<img src="{escape_html(image_path)}" alt="{escape_html(image_alt)}" loading="lazy" width="{og_image_width}" height="{og_image_height}">'
+    img_tag = f'<img src="{escape_html(image_path)}" alt="{escape_html(image_alt)}"{pet_image_style} loading="lazy" width="{og_image_width}" height="{og_image_height}">'
     content = re.sub(r'<img\s+src="{{IMAGE_PATH}}"\s+alt="{{IMAGE_ALT}}"[^>]*>', img_tag, content)
     # Fallback if template format is different
     if "{{IMAGE_PATH}}" in content:
@@ -1485,6 +1662,7 @@ def rebuild_single_tribute_page(entry: dict, tribute_message_override: str = "")
         second_image_filename=entry.get("image2_filename", ""),
         publish_date_iso=(entry.get("published_iso") or datetime.now().isoformat(timespec="seconds")),
         tribute_message_html=tribute_message_html,
+        framing_source=entry,
     )
 
     verify_safe_output_path(index_path)
@@ -1620,6 +1798,60 @@ class TributePublisherApp:
 
         create_frame = ttk.Frame(notebook)
         notebook.add(create_frame, text="Create Tribute")
+        create_frame.grid_rowconfigure(0, weight=1)
+        create_frame.grid_columnconfigure(0, weight=1)
+
+        create_scroll_outer = tk.Frame(create_frame)
+        create_scroll_outer.grid(row=0, column=0, sticky="nsew")
+        create_scroll_outer.grid_rowconfigure(0, weight=1)
+        create_scroll_outer.grid_columnconfigure(0, weight=1)
+
+        create_canvas = tk.Canvas(create_scroll_outer, highlightthickness=0)
+        create_vsb = ttk.Scrollbar(create_scroll_outer, orient="vertical", command=create_canvas.yview)
+        create_form_inner = tk.Frame(create_canvas)
+        _create_form_win = create_canvas.create_window((0, 0), window=create_form_inner, anchor="nw")
+
+        def _create_inner_configure(_event=None):
+            create_canvas.configure(scrollregion=create_canvas.bbox("all"))
+
+        def _create_canvas_configure(event):
+            create_canvas.itemconfigure(_create_form_win, width=event.width)
+
+        create_form_inner.bind("<Configure>", _create_inner_configure)
+        create_canvas.bind("<Configure>", _create_canvas_configure)
+        create_canvas.configure(yscrollcommand=create_vsb.set)
+        create_canvas.grid(row=0, column=0, sticky="nsew")
+        create_vsb.grid(row=0, column=1, sticky="ns")
+
+        def _create_on_mousewheel(event):
+            if getattr(event, "delta", 0):
+                create_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            elif getattr(event, "num", None) == 4:
+                create_canvas.yview_scroll(-1, "units")
+            elif getattr(event, "num", None) == 5:
+                create_canvas.yview_scroll(1, "units")
+
+        def _create_unbind_wheel():
+            try:
+                create_canvas.unbind_all("<MouseWheel>")
+                create_canvas.unbind_all("<Button-4>")
+                create_canvas.unbind_all("<Button-5>")
+            except tk.TclError:
+                pass
+
+        def _on_notebook_tab_changed(_event=None):
+            try:
+                idx = notebook.index(notebook.select())
+            except tk.TclError:
+                return
+            _create_unbind_wheel()
+            if idx == 0:
+                create_canvas.bind_all("<MouseWheel>", _create_on_mousewheel)
+                create_canvas.bind_all("<Button-4>", _create_on_mousewheel)
+                create_canvas.bind_all("<Button-5>", _create_on_mousewheel)
+
+        notebook.bind("<<NotebookTabChanged>>", _on_notebook_tab_changed)
+        _on_notebook_tab_changed()
 
         manager_frame = ttk.Frame(notebook)
         notebook.add(manager_frame, text="Tribute Manager")
@@ -1627,46 +1859,46 @@ class TributePublisherApp:
         # create tab layout
         pad = {"padx": 10, "pady": 6}
 
-        tk.Label(create_frame, text="Pet Name *").grid(row=0, column=0, sticky="w", **pad)
-        self.pet_name = tk.Entry(create_frame, width=44)
+        tk.Label(create_form_inner, text="Pet Name *").grid(row=0, column=0, sticky="w", **pad)
+        self.pet_name = tk.Entry(create_form_inner, width=44)
         self.pet_name.grid(row=0, column=1, sticky="w", **pad)
 
-        tk.Label(create_frame, text="Pet Type (optional)").grid(row=1, column=0, sticky="w", **pad)
-        self.pet_type = tk.Entry(create_frame, width=44)
+        tk.Label(create_form_inner, text="Pet Type (optional)").grid(row=1, column=0, sticky="w", **pad)
+        self.pet_type = tk.Entry(create_form_inner, width=44)
         self.pet_type.grid(row=1, column=1, sticky="w", **pad)
 
-        tk.Label(create_frame, text="First Name (optional)").grid(row=10, column=0, sticky="w", **pad)
-        self.first_name = tk.Entry(create_frame, width=44)
-        self.first_name.grid(row=10, column=1, sticky="w", **pad)
+        tk.Label(create_form_inner, text="First Name (optional)").grid(row=12, column=0, sticky="w", **pad)
+        self.first_name = tk.Entry(create_form_inner, width=44)
+        self.first_name.grid(row=12, column=1, sticky="w", **pad)
 
-        tk.Label(create_frame, text="State (optional)").grid(row=11, column=0, sticky="w", **pad)
-        self.state = tk.Entry(create_frame, width=44)
-        self.state.grid(row=11, column=1, sticky="w", **pad)
+        tk.Label(create_form_inner, text="State (optional)").grid(row=13, column=0, sticky="w", **pad)
+        self.state = tk.Entry(create_form_inner, width=44)
+        self.state.grid(row=13, column=1, sticky="w", **pad)
 
-        tk.Label(create_frame, text="Email (optional)").grid(row=12, column=0, sticky="w", **pad)
-        self.email = tk.Entry(create_frame, width=44)
-        self.email.grid(row=12, column=1, sticky="w", **pad)
+        tk.Label(create_form_inner, text="Email (optional)").grid(row=14, column=0, sticky="w", **pad)
+        self.email = tk.Entry(create_form_inner, width=44)
+        self.email.grid(row=14, column=1, sticky="w", **pad)
         self.email_sent_var = tk.BooleanVar(value=False)
         self.email_sent_check = tk.Checkbutton(
-            create_frame,
+            create_form_inner,
             text="Tribute Published (Email Sent)",
             variable=self.email_sent_var,
             onvalue=True,
             offvalue=False,
         )
-        self.email_sent_check.grid(row=13, column=1, sticky="w", **pad)
+        self.email_sent_check.grid(row=15, column=1, sticky="w", **pad)
 
-        tk.Label(create_frame, text="Breed (optional)").grid(row=4, column=0, sticky="w", **pad)
-        self.breed = tk.Entry(create_frame, width=44)
+        tk.Label(create_form_inner, text="Breed (optional)").grid(row=4, column=0, sticky="w", **pad)
+        self.breed = tk.Entry(create_form_inner, width=44)
         self.breed.grid(row=4, column=1, sticky="w", **pad)
 
-        tk.Label(create_frame, text="Dates of Life (optional, any format)").grid(row=5, column=0, sticky="w", **pad)
-        self.years = tk.Entry(create_frame, width=44)
+        tk.Label(create_form_inner, text="Dates of Life (optional, any format)").grid(row=5, column=0, sticky="w", **pad)
+        self.years = tk.Entry(create_form_inner, width=44)
         self.years.grid(row=5, column=1, sticky="w", **pad)
 
         # Certificate Text field (optional, for manual override)
-        tk.Label(create_frame, text="Certificate Text (optional)").grid(row=6, column=0, sticky="nw", **pad)
-        certificate_frame = tk.Frame(create_frame)
+        tk.Label(create_form_inner, text="Certificate Text (optional)").grid(row=6, column=0, sticky="nw", **pad)
+        certificate_frame = tk.Frame(create_form_inner)
         certificate_frame.grid(row=6, column=1, sticky="w", **pad)
         self.certificate_text = tk.Text(certificate_frame, width=62, height=3)
         self.certificate_text.pack(anchor="w")
@@ -1695,7 +1927,7 @@ class TributePublisherApp:
         update_certificate_counter()  # Initial update
         
         certificate_help = tk.Label(
-            create_frame,
+            create_form_inner,
             text="Override certificate message\n(up to 300 chars, max 4 lines)\nLeave empty to auto-extract",
             justify="left",
             fg="#666",
@@ -1713,13 +1945,13 @@ class TributePublisherApp:
             "Keep formatting minimal for best results."
         )
 
-        tk.Label(create_frame, text="Tribute Message *").grid(row=7, column=0, sticky="nw", **pad)
-        message_frame = tk.Frame(create_frame)
+        tk.Label(create_form_inner, text="Tribute Message *").grid(row=7, column=0, sticky="nw", **pad)
+        message_frame = tk.Frame(create_form_inner)
         message_frame.grid(row=7, column=1, sticky="w", **pad)
         self.message = tk.Text(message_frame, width=62, height=10)
         self.message.pack(anchor="w")
         self.message_guide = tk.Label(
-            create_frame,
+            create_form_inner,
             text=self.formatting_guide_text,
             justify="left",
             fg="#666",
@@ -1728,9 +1960,9 @@ class TributePublisherApp:
         )
         self.message_guide.grid(row=7, column=2, sticky="nw", padx=(8, 10), pady=6)
 
-        tk.Label(create_frame, text="Photo 1 (optional, recommended)").grid(row=8, column=0, sticky="w", **pad)
+        tk.Label(create_form_inner, text="Photo 1 (optional, recommended)").grid(row=8, column=0, sticky="w", **pad)
 
-        img_row = tk.Frame(create_frame)
+        img_row = tk.Frame(create_form_inner)
         img_row.grid(row=8, column=1, sticky="w", **pad)
 
         self.img_label = tk.Label(img_row, textvariable=self.image_path, width=34, anchor="w")
@@ -1741,10 +1973,16 @@ class TributePublisherApp:
         self.btn_clear_image = tk.Button(img_row, text="Clear", command=self.clear_image)
         self.btn_clear_image.pack(side="left")
 
-        tk.Label(create_frame, text="Photo 2 (optional)").grid(row=9, column=0, sticky="w", **pad)
+        self._framing_ui = self._mount_framing_editor(
+            create_form_inner,
+            row=9,
+            path_getter=lambda: self.image_path.get().strip(),
+        )
 
-        img2_row = tk.Frame(create_frame)
-        img2_row.grid(row=9, column=1, sticky="w", **pad)
+        tk.Label(create_form_inner, text="Photo 2 (optional)").grid(row=11, column=0, sticky="w", **pad)
+
+        img2_row = tk.Frame(create_form_inner)
+        img2_row.grid(row=11, column=1, sticky="w", **pad)
 
         self.img2_label = tk.Label(img2_row, textvariable=self.image2_path, width=34, anchor="w")
         self.img2_label.pack(side="left")
@@ -1753,8 +1991,8 @@ class TributePublisherApp:
         self.btn_clear_image2 = tk.Button(img2_row, text="Clear", command=self.clear_image2)
         self.btn_clear_image2.pack(side="left")
 
-        action_row = tk.Frame(create_frame)
-        action_row.grid(row=13, column=1, sticky="w", padx=10, pady=14)
+        action_row = tk.Frame(create_form_inner)
+        action_row.grid(row=17, column=1, sticky="w", padx=10, pady=14)
         self.btn_generate = tk.Button(
             action_row, text="Generate Tribute Files", command=self.generate, height=2, width=26
         )
@@ -1768,10 +2006,10 @@ class TributePublisherApp:
         self.open_email_btn.pack(side="left", padx=(10, 0))
 
         tk.Label(
-            create_frame,
+            create_form_inner,
             text=f"Output: {TRIBUTES_DIR}\nArchive: {ARCHIVE_INDEX}",
             fg="#444"
-        ).grid(row=14, column=0, columnspan=2, sticky="w", padx=10, pady=6)
+        ).grid(row=18, column=0, columnspan=2, sticky="w", padx=10, pady=6)
 
         # Force tab flow to match the visible top-to-bottom form layout.
         self._apply_create_form_tab_order([
@@ -1779,9 +2017,11 @@ class TributePublisherApp:
             self.pet_type,
             self.breed,
             self.years,
+            self.certificate_text,
             self.message,
             self.btn_choose_image,
             self.btn_clear_image,
+            self._framing_ui["zoom_scale"],
             self.btn_choose_image2,
             self.btn_clear_image2,
             self.first_name,
@@ -1923,13 +2163,68 @@ class TributePublisherApp:
         dialog.transient(self.root)
         dialog.grab_set()
         dialog.geometry("1240x820")
-        dialog.minsize(1120, 740)
+        dialog.minsize(800, 480)
+
+        dialog.grid_rowconfigure(0, weight=1)
+        dialog.grid_columnconfigure(0, weight=1)
+
+        edit_scroll_outer = tk.Frame(dialog)
+        edit_scroll_outer.grid(row=0, column=0, sticky="nsew")
+        edit_scroll_outer.grid_rowconfigure(0, weight=1)
+        edit_scroll_outer.grid_columnconfigure(0, weight=1)
+
+        edit_canvas = tk.Canvas(edit_scroll_outer, highlightthickness=0)
+        edit_vsb = ttk.Scrollbar(edit_scroll_outer, orient="vertical", command=edit_canvas.yview)
+        form_inner = tk.Frame(edit_canvas)
+        _edit_form_win = edit_canvas.create_window((0, 0), window=form_inner, anchor="nw")
+
+        def _edit_inner_configure(_event=None):
+            edit_canvas.configure(scrollregion=edit_canvas.bbox("all"))
+
+        def _edit_canvas_configure(event):
+            edit_canvas.itemconfigure(_edit_form_win, width=event.width)
+
+        form_inner.bind("<Configure>", _edit_inner_configure)
+        edit_canvas.bind("<Configure>", _edit_canvas_configure)
+        edit_canvas.configure(yscrollcommand=edit_vsb.set)
+        edit_canvas.grid(row=0, column=0, sticky="nsew")
+        edit_vsb.grid(row=0, column=1, sticky="ns")
+
+        def _edit_on_mousewheel(event):
+            if getattr(event, "delta", 0):
+                edit_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            elif getattr(event, "num", None) == 4:
+                edit_canvas.yview_scroll(-1, "units")
+            elif getattr(event, "num", None) == 5:
+                edit_canvas.yview_scroll(1, "units")
+
+        def _edit_bind_wheel(_e=None):
+            edit_canvas.bind_all("<MouseWheel>", _edit_on_mousewheel)
+            edit_canvas.bind_all("<Button-4>", _edit_on_mousewheel)
+            edit_canvas.bind_all("<Button-5>", _edit_on_mousewheel)
+
+        def _edit_unbind_wheel(_e=None):
+            try:
+                edit_canvas.unbind_all("<MouseWheel>")
+                edit_canvas.unbind_all("<Button-4>")
+                edit_canvas.unbind_all("<Button-5>")
+            except tk.TclError:
+                pass
+
+        dialog.bind("<Map>", lambda _e: _edit_bind_wheel())
+        dialog.bind("<Unmap>", lambda _e: _edit_unbind_wheel())
+
+        def _edit_dialog_destroy(event):
+            if event.widget == dialog:
+                _edit_unbind_wheel()
+
+        dialog.bind("<Destroy>", _edit_dialog_destroy)
 
         pad = {"padx": 10, "pady": 6}
         row = 0
 
-        tk.Label(dialog, text="Slug").grid(row=row, column=0, sticky="w", **pad)
-        tk.Label(dialog, text=slug, fg="#444").grid(row=row, column=1, sticky="w", **pad)
+        tk.Label(form_inner, text="Slug").grid(row=row, column=0, sticky="w", **pad)
+        tk.Label(form_inner, text=slug, fg="#444").grid(row=row, column=1, sticky="w", **pad)
         row += 1
 
         widgets = {}
@@ -1947,6 +2242,9 @@ class TributePublisherApp:
             selected_uploads[field_key] = path
             if field_key == "image_filename":
                 image1_display.set(os.path.basename(path))
+                fr = widgets.get("_framing")
+                if fr:
+                    fr["refresh"]()
             elif field_key == "image2_filename":
                 image2_display.set(os.path.basename(path))
 
@@ -1954,36 +2252,39 @@ class TributePublisherApp:
             selected_uploads[field_key] = ""
             if field_key == "image_filename":
                 image1_display.set("")
+                fr = widgets.get("_framing")
+                if fr:
+                    fr["refresh"]()
             elif field_key == "image2_filename":
                 image2_display.set("")
 
-        tk.Label(dialog, text="Pet Name *").grid(row=row, column=0, sticky="w", **pad)
-        widgets["pet_name"] = tk.Entry(dialog, width=48)
+        tk.Label(form_inner, text="Pet Name *").grid(row=row, column=0, sticky="w", **pad)
+        widgets["pet_name"] = tk.Entry(form_inner, width=48)
         widgets["pet_name"].insert(0, str(entry.get("pet_name", "") or ""))
         widgets["pet_name"].grid(row=row, column=1, sticky="w", **pad)
         row += 1
 
-        tk.Label(dialog, text="Pet Type (optional)").grid(row=row, column=0, sticky="w", **pad)
-        widgets["pet_type"] = tk.Entry(dialog, width=48)
+        tk.Label(form_inner, text="Pet Type (optional)").grid(row=row, column=0, sticky="w", **pad)
+        widgets["pet_type"] = tk.Entry(form_inner, width=48)
         widgets["pet_type"].insert(0, str(entry.get("pet_type", "") or ""))
         widgets["pet_type"].grid(row=row, column=1, sticky="w", **pad)
         row += 1
 
-        tk.Label(dialog, text="Breed (optional)").grid(row=row, column=0, sticky="w", **pad)
-        widgets["breed"] = tk.Entry(dialog, width=48)
+        tk.Label(form_inner, text="Breed (optional)").grid(row=row, column=0, sticky="w", **pad)
+        widgets["breed"] = tk.Entry(form_inner, width=48)
         widgets["breed"].insert(0, str(entry.get("breed", "") or ""))
         widgets["breed"].grid(row=row, column=1, sticky="w", **pad)
         row += 1
 
-        tk.Label(dialog, text="Dates of Life (optional, any format)").grid(row=row, column=0, sticky="w", **pad)
-        widgets["years_pretty"] = tk.Entry(dialog, width=48)
+        tk.Label(form_inner, text="Dates of Life (optional, any format)").grid(row=row, column=0, sticky="w", **pad)
+        widgets["years_pretty"] = tk.Entry(form_inner, width=48)
         widgets["years_pretty"].insert(0, str(entry.get("years_pretty", "") or ""))
         widgets["years_pretty"].grid(row=row, column=1, sticky="w", **pad)
         row += 1
 
         # Certificate Text field (optional, for manual override)
-        tk.Label(dialog, text="Certificate Text (optional)").grid(row=row, column=0, sticky="nw", **pad)
-        cert_frame = tk.Frame(dialog)
+        tk.Label(form_inner, text="Certificate Text (optional)").grid(row=row, column=0, sticky="nw", **pad)
+        cert_frame = tk.Frame(form_inner)
         cert_frame.grid(row=row, column=1, sticky="w", **pad)
         widgets["certificate_text"] = tk.Text(cert_frame, width=62, height=3)
         widgets["certificate_text"].pack(anchor="w")
@@ -2015,14 +2316,14 @@ class TributePublisherApp:
         
         row += 1
 
-        tk.Label(dialog, text="Tribute Message *").grid(row=row, column=0, sticky="nw", **pad)
-        text_frame = tk.Frame(dialog)
+        tk.Label(form_inner, text="Tribute Message *").grid(row=row, column=0, sticky="nw", **pad)
+        text_frame = tk.Frame(form_inner)
         text_frame.grid(row=row, column=1, sticky="w", **pad)
         widgets["excerpt"] = tk.Text(text_frame, width=62, height=12, wrap="word")
         widgets["excerpt"].pack(anchor="w")
         widgets["excerpt"].insert("1.0", full_tribute_message)
         tk.Label(
-            dialog,
+            form_inner,
             text=self.formatting_guide_text,
             justify="left",
             fg="#666",
@@ -2031,36 +2332,64 @@ class TributePublisherApp:
         ).grid(row=row, column=2, sticky="nw", padx=(8, 10), pady=6)
         row += 1
 
-        tk.Label(dialog, text="Photo 1 (optional, recommended)").grid(row=row, column=0, sticky="w", **pad)
-        img_row = tk.Frame(dialog)
+        tk.Label(form_inner, text="Photo 1 (optional, recommended)").grid(row=row, column=0, sticky="w", **pad)
+        img_row = tk.Frame(form_inner)
         img_row.grid(row=row, column=1, sticky="w", **pad)
         tk.Label(img_row, textvariable=image1_display, width=34, anchor="w").pack(side="left")
         tk.Button(img_row, text="Choose…", command=lambda: choose_image_for_field("image_filename")).pack(side="left", padx=6)
         tk.Button(img_row, text="Clear", command=lambda: clear_image_field("image_filename")).pack(side="left")
         row += 1
 
-        tk.Label(dialog, text="Photo 2 (optional)").grid(row=row, column=0, sticky="w", **pad)
-        img2_row = tk.Frame(dialog)
+        tribute_folder_edit = find_tribute_folder(slug, entry.get("folder", ""))
+
+        def get_edit_photo1_path() -> str:
+            pu = (selected_uploads.get("image_filename") or "").strip()
+            if pu and os.path.isfile(pu):
+                return pu
+            fn = (image1_display.get() or "").strip()
+            if fn and not (("/" in fn) or ("\\" in fn) or re.match(r"^[A-Za-z]:", fn)):
+                cand = os.path.join(tribute_folder_edit, fn)
+                if os.path.isfile(cand):
+                    return cand
+            return ""
+
+        iy_f, ix_f, iz_f = 0.0, 0.0, 1.0
+        if entry_uses_visual_pet_framing(entry):
+            iy_f = float(entry.get("image_offset_y", entry.get("image_position_y") or 0) or 0)
+            ix_f = float(entry.get("image_offset_x", entry.get("image_position_x") or 0) or 0)
+            iz_f = float(entry.get("image_zoom") or 1)
+        widgets["_framing"] = self._mount_framing_editor(
+            form_inner,
+            row=row,
+            path_getter=get_edit_photo1_path,
+            initial_y=iy_f,
+            initial_x=ix_f,
+            initial_z=iz_f,
+        )
+        row += 1
+
+        tk.Label(form_inner, text="Photo 2 (optional)").grid(row=row, column=0, sticky="w", **pad)
+        img2_row = tk.Frame(form_inner)
         img2_row.grid(row=row, column=1, sticky="w", **pad)
         tk.Label(img2_row, textvariable=image2_display, width=34, anchor="w").pack(side="left")
         tk.Button(img2_row, text="Choose…", command=lambda: choose_image_for_field("image2_filename")).pack(side="left", padx=6)
         tk.Button(img2_row, text="Clear", command=lambda: clear_image_field("image2_filename")).pack(side="left")
         row += 1
 
-        tk.Label(dialog, text="First Name (optional)").grid(row=row, column=0, sticky="w", **pad)
-        widgets["first_name"] = tk.Entry(dialog, width=48)
+        tk.Label(form_inner, text="First Name (optional)").grid(row=row, column=0, sticky="w", **pad)
+        widgets["first_name"] = tk.Entry(form_inner, width=48)
         widgets["first_name"].insert(0, str(entry.get("first_name", "") or ""))
         widgets["first_name"].grid(row=row, column=1, sticky="w", **pad)
         row += 1
 
-        tk.Label(dialog, text="State (optional)").grid(row=row, column=0, sticky="w", **pad)
-        widgets["state"] = tk.Entry(dialog, width=48)
+        tk.Label(form_inner, text="State (optional)").grid(row=row, column=0, sticky="w", **pad)
+        widgets["state"] = tk.Entry(form_inner, width=48)
         widgets["state"].insert(0, str(entry.get("state", "") or ""))
         widgets["state"].grid(row=row, column=1, sticky="w", **pad)
         row += 1
 
-        tk.Label(dialog, text="Email (optional)").grid(row=row, column=0, sticky="w", **pad)
-        widgets["email"] = tk.Entry(dialog, width=48)
+        tk.Label(form_inner, text="Email (optional)").grid(row=row, column=0, sticky="w", **pad)
+        widgets["email"] = tk.Entry(form_inner, width=48)
         widgets["email"].insert(0, str(entry.get("email", "") or ""))
         widgets["email"].grid(row=row, column=1, sticky="w", **pad)
         row += 1
@@ -2068,7 +2397,7 @@ class TributePublisherApp:
         edit_email_sent_var = tk.BooleanVar(value=(entry.get("email_sent") is True))
         widgets["email_sent_var"] = edit_email_sent_var
         tk.Checkbutton(
-            dialog,
+            form_inner,
             text="Tribute Published (Email Sent)",
             variable=edit_email_sent_var,
             onvalue=True,
@@ -2187,6 +2516,11 @@ class TributePublisherApp:
 
             entry["image_filename"] = image1_filename
             entry["image2_filename"] = image2_filename
+            fr = widgets.get("_framing")
+            if fr:
+                fragment = collect_visual_framing_fragment(fr["fr_y"].get(), fr["fr_x"].get(), fr["fr_zoom"].get())
+                if fr["touched"][0] or fragment:
+                    merge_visual_framing_into_entry(entry, fragment)
             entry["years_pretty"] = normalize_dates_text(entry.get("years_pretty", ""))
             self.last_tribute_url = f"{SITE_DOMAIN}{get_entry_web_base(entry)}"
             self.last_email = entry.get("email", "").strip()
@@ -2213,7 +2547,7 @@ class TributePublisherApp:
             dialog.destroy()
 
         btn_row = ttk.Frame(dialog)
-        btn_row.grid(row=row, column=0, columnspan=3, sticky="e", padx=10, pady=(8, 10))
+        btn_row.grid(row=1, column=0, sticky="e", padx=10, pady=(8, 10))
         ttk.Button(btn_row, text="Cancel", command=dialog.destroy).pack(side="right")
         ttk.Button(btn_row, text="Send Publish Email", command=self.send_publish_email).pack(side="right", padx=(0, 8))
         ttk.Button(btn_row, text="Save Changes", command=on_save).pack(side="right", padx=(0, 8))
@@ -2261,6 +2595,181 @@ class TributePublisherApp:
 
         messagebox.showinfo("Deleted", f"Permanently deleted {deleted_count} tribute(s), removed all files and folders, and rebuilt archive.")
 
+    def _mount_framing_editor(
+        self,
+        parent: tk.Misc,
+        *,
+        row: int,
+        path_getter,
+        columnspan: int = 3,
+        pad: dict | None = None,
+        initial_y: float = 0.0,
+        initial_x: float = 0.0,
+        initial_z: float = 1.0,
+    ) -> dict:
+        """
+        Live 4:3 preview + drag pan + zoom for hero pet photo. Returns dict with DoubleVars, refresh(), touched list.
+        """
+        pad = pad or {"padx": 10, "pady": 6}
+        touched: list[bool] = [False]
+        cw, ch = 320, 240
+
+        def mark_touched():
+            touched[0] = True
+
+        fr_y = tk.DoubleVar(value=float(initial_y))
+        fr_x = tk.DoubleVar(value=float(initial_x))
+        fr_z = tk.DoubleVar(value=float(initial_z))
+
+        outer = tk.Frame(parent)
+        outer.grid(row=row, column=0, columnspan=columnspan, sticky="nw", **pad)
+
+        tk.Label(
+            outer,
+            text="Pet photo framing (live preview)",
+            font=("TkDefaultFont", 10, "bold"),
+        ).grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 4))
+
+        cv = tk.Canvas(
+            outer,
+            width=cw,
+            height=ch,
+            highlightthickness=1,
+            highlightbackground="#bdbdbd",
+            bg="#dedede",
+            cursor="fleur",
+        )
+        cv.grid(row=1, column=0, rowspan=5, sticky="nw", padx=(0, 14), pady=(0, 4))
+
+        ctrl = tk.Frame(outer)
+        ctrl.grid(row=1, column=1, columnspan=2, sticky="nw")
+
+        def fmt_vals() -> str:
+            return (
+                f"offset Y: {fr_y.get():.1f}%   offset X: {fr_x.get():.1f}%   zoom: {fr_z.get():.2f}×"
+            )
+
+        val_lbl = tk.Label(ctrl, text=fmt_vals(), fg="#333", font=("TkDefaultFont", 9))
+        val_lbl.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 6))
+
+        tk.Label(ctrl, text="Zoom").grid(row=1, column=0, sticky="w")
+
+        def on_zoom_change(_val=None):
+            mark_touched()
+            refresh_preview()
+            val_lbl.config(text=fmt_vals())
+
+        zoom_scale = ttk.Scale(ctrl, from_=0.5, to=2.0, orient="horizontal", length=220, variable=fr_z, command=on_zoom_change)
+        zoom_scale.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(2, 0))
+
+        photo_holder: dict[str, object] = {"ph": None}
+        drag_last: list[tuple[int, int] | None] = [None]
+
+        def refresh_preview(event=None):
+            path = (path_getter() or "").strip()
+            cv.delete("all")
+            if not path or not os.path.isfile(path):
+                cv.create_text(cw // 2, ch // 2, text="Choose Photo 1 to preview framing", fill="#666", font=("TkDefaultFont", 10))
+                val_lbl.config(text=fmt_vals())
+                return
+            if not ensure_pillow():
+                cv.create_text(cw // 2, ch // 2, text="Install Pillow for image preview", fill="#666")
+                return
+            try:
+                pil = Image.open(path).convert("RGBA")
+                iw, ih = pil.size
+                if iw < 1 or ih < 1:
+                    return
+                z = max(0.5, min(2.0, float(fr_z.get())))
+                base = max(cw / float(iw), ch / float(ih))
+                cover = max(base * z, base)
+                sw = max(cw, int(math.ceil(iw * cover - 1e-9)))
+                sh = max(ch, int(math.ceil(ih * cover - 1e-9)))
+                pil_s = pil.resize((sw, sh), Image.LANCZOS)
+                xp = max(-80.0, min(80.0, float(fr_x.get())))
+                yp = max(-80.0, min(80.0, float(fr_y.get())))
+                px = (xp / 100.0) * sw
+                py = (yp / 100.0) * sh
+                x0 = (cw - sw) / 2.0 + px
+                y0 = (ch - sh) / 2.0 + py
+                x0 = max(float(cw - sw), min(0.0, x0))
+                y0 = max(float(ch - sh), min(0.0, y0))
+                ix = int(math.floor(x0 + 1e-6))
+                iy = int(math.floor(y0 + 1e-6))
+                if ix + sw < cw:
+                    ix = cw - sw
+                if iy + sh < ch:
+                    iy = ch - sh
+                if ix > 0:
+                    ix = 0
+                if iy > 0:
+                    iy = 0
+                ph = ImageTk.PhotoImage(pil_s)
+                photo_holder["ph"] = ph
+                cv.create_image(ix, iy, anchor="nw", image=ph)
+            except Exception:
+                cv.create_text(cw // 2, ch // 2, text="Could not load preview", fill="#a33")
+
+            val_lbl.config(text=fmt_vals())
+
+        def on_drag_start(e):
+            mark_touched()
+            drag_last[0] = (e.x, e.y)
+
+        def on_drag_move(e):
+            if drag_last[0] is None:
+                return
+            lx, ly = drag_last[0]
+            dx, dy = e.x - lx, e.y - ly
+            drag_last[0] = (e.x, e.y)
+            fr_x.set(max(-80.0, min(80.0, fr_x.get() + dx * 0.22)))
+            fr_y.set(max(-80.0, min(80.0, fr_y.get() + dy * 0.22)))
+            refresh_preview()
+
+        def on_drag_end(_e=None):
+            drag_last[0] = None
+
+        cv.bind("<ButtonPress-1>", on_drag_start)
+        cv.bind("<B1-Motion>", on_drag_move)
+        cv.bind("<ButtonRelease-1>", on_drag_end)
+
+        def reset_framing():
+            fr_y.set(0.0)
+            fr_x.set(0.0)
+            fr_z.set(1.0)
+            mark_touched()
+            refresh_preview()
+
+        ttk.Button(ctrl, text="Reset Image Framing", command=reset_framing).grid(row=3, column=0, sticky="w", pady=(14, 0))
+
+        tk.Label(
+            ctrl,
+            text="Drag to pan. Values are saved to data.json and applied on the tribute page (CSS transform).",
+            fg="#666",
+            font=("TkDefaultFont", 8),
+            wraplength=360,
+            justify="left",
+        ).grid(row=4, column=0, columnspan=2, sticky="w", pady=(10, 0))
+
+        refresh_preview()
+
+        return {
+            "fr_y": fr_y,
+            "fr_x": fr_x,
+            "fr_zoom": fr_z,
+            "canvas": cv,
+            "zoom_scale": zoom_scale,
+            "touched": touched,
+            "refresh": refresh_preview,
+            "reset": reset_framing,
+        }
+
+    def _collect_framing_fragment(self) -> dict:
+        ui = getattr(self, "_framing_ui", None)
+        if not ui:
+            return {}
+        return collect_visual_framing_fragment(ui["fr_y"].get(), ui["fr_x"].get(), ui["fr_zoom"].get())
+
     def choose_image(self):
         path = filedialog.askopenfilename(
             title="Select tribute photo",
@@ -2268,6 +2777,8 @@ class TributePublisherApp:
         )
         if path:
             self.image_path.set(path)
+            if getattr(self, "_framing_ui", None):
+                self._framing_ui["refresh"]()
 
     def choose_image2(self):
         path = filedialog.askopenfilename(
@@ -2279,6 +2790,8 @@ class TributePublisherApp:
 
     def clear_image(self):
         self.image_path.set("")
+        if getattr(self, "_framing_ui", None):
+            self._framing_ui["refresh"]()
 
     def clear_image2(self):
         self.image2_path.set("")
@@ -2507,6 +3020,7 @@ Alma, Arkansas
             second_image_filename=img2_filename,
             publish_date_iso=publish_date_iso,
             tribute_message_html=tribute_message_html,
+            framing_source=self._collect_framing_fragment(),
         )
 
         if tribute_html is None:
@@ -2554,6 +3068,8 @@ Alma, Arkansas
         }
         if email:
             entry["email"] = email
+
+        merge_visual_framing_into_entry(entry, self._collect_framing_fragment())
 
         # prevent duplicates by slug
         entries = [e for e in entries if e.get("slug") != folder_slug]
