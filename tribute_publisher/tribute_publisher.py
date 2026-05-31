@@ -15,7 +15,7 @@ from datetime import datetime
 from email.message import EmailMessage
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageOps
 
 # Certificate generator
 try:
@@ -503,6 +503,16 @@ def ensure_pillow():
         return False
 
 
+def open_image_exif_corrected(path: str) -> Image.Image:
+    """
+    Load an image file with EXIF Orientation applied so pixel dimensions and
+    upright display match phones/cameras (ImageOps.exif_transpose).
+    Returns a standalone copy safe to use after the file handle closes.
+    """
+    with Image.open(path) as im:
+        return ImageOps.exif_transpose(im).copy()
+
+
 def process_placeholder_image(source_png_path: str, output_path: str):
     verify_safe_output_path(output_path)
     with Image.open(source_png_path) as img:
@@ -529,44 +539,40 @@ def convert_to_webp_normalized(
     - Respect EXIF orientation
     Returns info dict for logging/debug.
     """
-    from PIL import Image, ImageOps
-
     verify_safe_output_path(dest_path)
-    with Image.open(src_path) as im:
-        # Fix phone rotation issues (EXIF orientation)
-        im = ImageOps.exif_transpose(im)
+    im = open_image_exif_corrected(src_path)
 
-        # Convert to RGB if needed (WebP doesn't like some modes)
-        if im.mode in ("RGBA", "P"):
-            # Keep alpha if present; Pillow can save WebP with alpha
-            pass
-        elif im.mode != "RGB":
-            im = im.convert("RGB")
+    # Convert to RGB if needed (WebP doesn't like some modes)
+    if im.mode in ("RGBA", "P"):
+        # Keep alpha if present; Pillow can save WebP with alpha
+        pass
+    elif im.mode != "RGB":
+        im = im.convert("RGB")
 
-        orig_w, orig_h = im.size
+    orig_w, orig_h = im.size
 
-        # Downscale only (no upscaling)
-        if orig_w > max_width:
-            new_h = int((max_width / orig_w) * orig_h)
-            im = im.resize((max_width, new_h), Image.LANCZOS)
+    # Downscale only (no upscaling)
+    if orig_w > max_width:
+        new_h = int((max_width / orig_w) * orig_h)
+        im = im.resize((max_width, new_h), Image.LANCZOS)
 
-        # Save WebP
-        save_kwargs = {
-            "format": "WEBP",
-            "quality": quality,
-            "method": 6,     # slower but better compression
-        }
+    # Save WebP
+    save_kwargs = {
+        "format": "WEBP",
+        "quality": quality,
+        "method": 6,     # slower but better compression
+    }
 
-        # If image has alpha, keep it; otherwise ensure RGB
-        # Pillow handles this automatically in most cases.
-        im.save(dest_path, **save_kwargs)
+    # If image has alpha, keep it; otherwise ensure RGB
+    # Pillow handles this automatically in most cases.
+    im.save(dest_path, **save_kwargs)
 
-        final_w, final_h = im.size
-        return {
-            "orig": (orig_w, orig_h),
-            "final": (final_w, final_h),
-            "resized": orig_w > max_width
-        }
+    final_w, final_h = im.size
+    return {
+        "orig": (orig_w, orig_h),
+        "final": (final_w, final_h),
+        "resized": orig_w > max_width
+    }
 
 
 def load_data() -> list[dict]:
@@ -1231,7 +1237,7 @@ def get_image_dimensions(image_path: str) -> tuple[int, int]:
     try:
         if os.path.exists(image_path):
             with Image.open(image_path) as img:
-                return img.size  # Returns (width, height)
+                return ImageOps.exif_transpose(img).size
     except Exception:
         pass
     # Fallback to recommended OG image size
@@ -2676,7 +2682,7 @@ class TributePublisherApp:
                 cv.create_text(cw // 2, ch // 2, text="Install Pillow for image preview", fill="#666")
                 return
             try:
-                pil = Image.open(path).convert("RGBA")
+                pil = open_image_exif_corrected(path).convert("RGBA")
                 iw, ih = pil.size
                 if iw < 1 or ih < 1:
                     return

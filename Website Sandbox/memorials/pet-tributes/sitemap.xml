@@ -12,17 +12,17 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://meltonmemorials.com/memorials/pet-tributes/cat/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://meltonmemorials.com/memorials/pet-tributes/dog/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://meltonmemorials.com/memorials/pet-tributes/dog/page-2/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/cat/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -138,6 +138,21 @@
   </url>
   <url>
     <loc>https://meltonmemorials.com/memorials/pet-tributes/zoey-cat-siberian/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/bailey-dog-papillon-mix/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/misty-cat-ragdoll/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meltonmemorials.com/memorials/pet-tributes/sophie-dog-pomeranian/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

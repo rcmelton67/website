@@ -9,12 +9,21 @@ import os
 import re
 import time
 import math
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageOps
 
 # Template caching for performance
 _cached_template = None
 _cached_template_path = None
 _cached_template_mtime = None
+
+
+def _load_photo_rgb_exif_corrected(photo_path: str) -> Image.Image:
+    """Open pet photo and apply EXIF orientation; return RGB standalone copy."""
+    with Image.open(photo_path) as im:
+        out = ImageOps.exif_transpose(im).copy()
+    if out.mode != "RGB":
+        out = out.convert("RGB")
+    return out
 
 
 def compose_rounded_photo(
@@ -48,41 +57,36 @@ def compose_rounded_photo(
     if not os.path.exists(photo_path):
         raise FileNotFoundError(f"Photo not found: {photo_path}")
     
-    # Load and convert to RGB
-    with Image.open(photo_path) as img:
-        if img.mode != "RGB":
-            img = img.convert("RGB")
-        
-        width, height = img.size
-        
-        # Step 1: Center crop to square
-        if width > height:
-            left = (width - height) // 2
-            img = img.crop((left, 0, left + height, height))
-        elif height > width:
-            top = (height - width) // 2
-            img = img.crop((0, top, width, top + width))
-        
-        # Step 2: Resize to final size
-        img = img.resize((output_size, output_size), Image.LANCZOS)
-        
-        # Step 3: Create transparent RGBA canvas
-        final = Image.new("RGBA", (output_size, output_size), (0, 0, 0, 0))
-        
-        # Step 4: Create rounded-rectangle alpha mask
-        mask = Image.new("L", (output_size, output_size), 0)
-        draw = ImageDraw.Draw(mask)
-        draw.rounded_rectangle(
-            [(0, 0), (output_size, output_size)],
-            corner_radius,
-            fill=255
-        )
-        
-        # Step 5: Paste photo onto transparent canvas and apply mask
-        final.paste(img, (0, 0))
-        final.putalpha(mask)
-        
-        return final
+    img = _load_photo_rgb_exif_corrected(photo_path)
+    width, height = img.size
+    
+    # Step 1: Center crop to square
+    if width > height:
+        left = (width - height) // 2
+        img = img.crop((left, 0, left + height, height))
+    elif height > width:
+        top = (height - width) // 2
+        img = img.crop((0, top, width, top + width))
+    # Step 2: Resize to final size
+    img = img.resize((output_size, output_size), Image.LANCZOS)
+    
+    # Step 3: Create transparent RGBA canvas
+    final = Image.new("RGBA", (output_size, output_size), (0, 0, 0, 0))
+    
+    # Step 4: Create rounded-rectangle alpha mask
+    mask = Image.new("L", (output_size, output_size), 0)
+    draw = ImageDraw.Draw(mask)
+    draw.rounded_rectangle(
+        [(0, 0), (output_size, output_size)],
+        corner_radius,
+        fill=255
+    )
+    
+    # Step 5: Paste photo onto transparent canvas and apply mask
+    final.paste(img, (0, 0))
+    final.putalpha(mask)
+    
+    return final
 
 
 def tribute_has_visual_framing_metadata(tribute: dict | None) -> bool:
@@ -144,8 +148,7 @@ def compose_rounded_photo_framed(
     ox = max(-80.0, min(80.0, float(offset_x_pct)))
     oy = max(-80.0, min(80.0, float(offset_y_pct)))
 
-    with Image.open(photo_path) as img0:
-        img = img0.convert("RGB")
+    img = _load_photo_rgb_exif_corrected(photo_path)
     iw, ih = img.size
     if iw < 1 or ih < 1:
         return compose_rounded_photo(photo_path, output_size, corner_radius)
